@@ -9,20 +9,31 @@ Jorge Alejandro Torres Paez
 ## 📁 PLANTILLA DE ESTRUCTURA 
 
 ```
-BACKEND_HUELLITAS/
+HUELLITAS-SALUDABLES
 │
-├── src/
-│   ├── config/
-│   ├── controllers/
-│   ├── routes/
-│   ├── models/
-│   └── app.js
 │
-├── package.json
-├── .env.example
-├── README.md
+├── BACKEND/
+│   │
+│   ├── app/
+│   │   ├── controllers/
+│   │   ├── models/
+│   │   ├── schemas/
+│   │   ├── routes/
+│   │   ├── config/
+│   │   ├── services/
+│   │   ├── utils/
+│   │   └── middlewares/
+│   │
+│   └── database/
+│       
+│       
+│
+├── .git/
+│
+│
 ├── .gitignore
-├── requirements.txt
+├── README.md
+└── package.json
 ```
 
 
