@@ -1,37 +1,139 @@
 /**
  * controllers/disponibilidad.controller.js
  * ---------------------------------------------------------
- * Capa delgada: solo traduce HTTP <-> service. Sin logica de
- * negocio ni SQL aqui (eso vive en services/ y models/).
- * ---------------------------------------------------------
  */
-const disponibilidadService = require('../services/disponibilidad.service');
-const asyncHandler = require('../utils/asyncHandler');
-const { ok, created } = require('../utils/response');
 
-const listar = asyncHandler(async (req, res) => {
-  const disponibilidades = await disponibilidadService.listar(req.query);
-  return ok(res, disponibilidades, 'Disponibilidad listada correctamente');
-});
+const disponibilidadService =
+  require('../services/disponibilidad.service');
 
-const obtener = asyncHandler(async (req, res) => {
-  const disponibilidad = await disponibilidadService.obtenerPorId(req.params.id);
-  return ok(res, disponibilidad);
-});
+const asyncHandler =
+  require('../utils/asyncHandler');
 
-const crear = asyncHandler(async (req, res) => {
-  const nueva = await disponibilidadService.crear(req.body);
-  return created(res, nueva, 'Franja de disponibilidad creada correctamente');
-});
+const {
+  ok,
+  created
+} = require('../utils/response');
 
-const actualizar = asyncHandler(async (req, res) => {
-  const actualizada = await disponibilidadService.actualizar(req.params.id, req.body);
-  return ok(res, actualizada, 'Disponibilidad actualizada correctamente');
-});
+/*
+|--------------------------------------------------------------------------
+| LISTAR
+|--------------------------------------------------------------------------
+*/
 
-const eliminar = asyncHandler(async (req, res) => {
-  await disponibilidadService.eliminar(req.params.id);
-  return ok(res, null, 'Disponibilidad eliminada correctamente');
-});
+const listar =
+  asyncHandler(
+    async (req, res) => {
 
-module.exports = { listar, obtener, crear, actualizar, eliminar };
+      const datos =
+        await disponibilidadService.listar(
+          req.query
+        );
+
+      return ok(
+        res,
+        datos,
+        'Disponibilidades listadas correctamente'
+      );
+    }
+  );
+
+/*
+|--------------------------------------------------------------------------
+| OBTENER
+|--------------------------------------------------------------------------
+*/
+
+const obtener =
+  asyncHandler(
+    async (req, res) => {
+
+      const dato =
+        await disponibilidadService.obtenerPorId(
+          req.params.id
+        );
+
+      return ok(
+        res,
+        dato,
+        'Disponibilidad encontrada correctamente'
+      );
+    }
+  );
+
+/*
+|--------------------------------------------------------------------------
+| CREAR
+|--------------------------------------------------------------------------
+*/
+
+const crear =
+  asyncHandler(
+    async (req, res) => {
+
+      const dato =
+        await disponibilidadService.crear(
+          req.body
+        );
+
+      return created(
+        res,
+        dato,
+        'Disponibilidad creada correctamente'
+      );
+    }
+  );
+
+/*
+|--------------------------------------------------------------------------
+| ACTUALIZAR
+|--------------------------------------------------------------------------
+*/
+
+const actualizar =
+  asyncHandler(
+    async (req, res) => {
+
+      const dato =
+        await disponibilidadService.actualizar(
+          req.params.id,
+          req.body
+        );
+
+      return ok(
+        res,
+        dato,
+        'Disponibilidad actualizada correctamente'
+      );
+    }
+  );
+
+/*
+|--------------------------------------------------------------------------
+| ELIMINAR
+|--------------------------------------------------------------------------
+*/
+
+const eliminar =
+  asyncHandler(
+    async (req, res) => {
+
+      await disponibilidadService.eliminar(
+        req.params.id
+      );
+
+      return ok(
+        res,
+        null,
+        'Disponibilidad eliminada correctamente'
+      );
+    }
+  );
+
+module.exports = {
+  listar,
+  obtener,
+  crear,
+  actualizar,
+  eliminar
+};
+

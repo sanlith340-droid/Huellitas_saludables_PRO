@@ -1,111 +1,443 @@
 /**
  * services/cita.service.js
  * ---------------------------------------------------------
- * RF07: "El dueno podra solicitar citas veterinarias segun
- *        disponibilidad del sistema."
- * RF10: "El veterinario podra consultar las citas que tiene
- *        asignadas."
+ * Lógica de negocio de citas.
  * ---------------------------------------------------------
  */
-const citaModel = require('../models/cita.model');
-const mascotaModel = require('../models/mascota.model');
-const disponibilidadModel = require('../models/disponibilidad.model');
-const usuarioModel = require('../models/usuario.model');
-const notificacionService = require('./notificacion.service');
-const AppError = require('../utils/AppError');
+
+const citaModel =
+  require('../models/cita.model');
+
+const mascotaModel =
+  require('../models/mascota.model');
+
+const disponibilidadModel =
+  require('../models/disponibilidad.model');
+
+const usuarioModel =
+  require('../models/usuario.model');
+
+const AppError =
+  require('../utils/AppError');
+
+
+/*
+|--------------------------------------------------------------------------
+| LISTAR CITAS
+|--------------------------------------------------------------------------
+*/
 
 async function listar(filtros) {
-  return citaModel.findAll(filtros);
+
+  return citaModel.findAll(
+    filtros
+  );
 }
 
+
+/*
+|--------------------------------------------------------------------------
+| OBTENER CITA
+|--------------------------------------------------------------------------
+*/
+
 async function obtenerPorId(id_cita) {
-  const cita = await citaModel.findById(id_cita);
-  if (!cita) throw AppError.notFound(`No existe cita con id ${id_cita}`);
+
+  const cita =
+    await citaModel.findById(
+      id_cita
+    );
+
+  if (!cita) {
+
+    throw AppError.notFound(
+      `No existe cita con id ${id_cita}`
+    );
+  }
+
   return cita;
 }
 
-/**
- * RF10: citas asignadas a un veterinario.
- */
-async function listarPorVeterinario(id_veterinario) {
-  const veterinario = await usuarioModel.findByIdAndRol(id_veterinario, 'veterinario');
-  if (!veterinario) {
-    throw AppError.badRequest(`id_usuario (${id_veterinario}) no corresponde a un veterinario registrado`);
+
+/*
+|--------------------------------------------------------------------------
+| CITAS POR ESPECIALISTA
+|--------------------------------------------------------------------------
+*/
+
+async function listarPorEspecialista(
+  id_especialista
+) {
+
+  const especialista =
+    await usuarioModel.findByIdAndRol(
+      id_especialista,
+      'especialista'
+    );
+
+  if (!especialista) {
+
+    throw AppError.notFound(
+      `No existe especialista con ID ${id_especialista}`
+    );
   }
-  return citaModel.findByVeterinario(id_veterinario);
+
+
+  return citaModel.findByEspecialista(
+    id_especialista
+  );
 }
 
-/**
- * RF07: el dueno (req.user) solicita una cita para una de sus
- * mascotas, sobre una franja de disponibilidad libre. El registro
- * queda asociado al recepcionista/agendador que gestiona la
- * peticion (id_recepcionista), segun el modelo de datos actual.
- */
-async function solicitar({ id_mascota, id_disponibilidad, motivos, solicitante, id_recepcionista }) {
-  const mascota = await mascotaModel.findById(id_mascota);
-  if (!mascota) throw AppError.notFound(`No existe la mascota con id ${id_mascota}`);
 
-  // Un dueno solo puede agendar citas para sus propias mascotas.
-  // Un recepcionista/admin puede agendar en nombre de cualquier dueno.
-  if (solicitante.rol === 'usuario') {
-    const esSuya = await mascotaModel.perteneceAUsuario(id_mascota, solicitante.id);
-    if (!esSuya) {
-      throw AppError.forbidden('La mascota indicada no pertenece al usuario autenticado');
+/*
+|--------------------------------------------------------------------------
+| CREAR CITA
+|--------------------------------------------------------------------------
+*/
+
+async function crear({
+  id_mascota,
+  id_disponibilidad,
+  motivo,
+  solicitante
+}) {
+
+  /*
+  |--------------------------------------------------------------------------
+  | Validar mascota
+  |--------------------------------------------------------------------------
+  */
+
+  const mascota =
+    await mascotaModel.findById(
+      id_mascota
+    );
+
+  if (!mascota) {
+
+    throw AppError.notFound(
+      `No existe la mascota con id ${id_mascota}`
+    );
+  }
+
+
+  /*
+  |--------------------------------------------------------------------------
+  | Usuario normal:
+  | solamente puede crear cita para su mascota
+  |--------------------------------------------------------------------------
+  */
+
+  if (
+    solicitante.rol === 'usuario'
+  ) {
+
+    const pertenece =
+      await mascotaModel.perteneceAUsuario(
+        id_mascota,
+        solicitante.id
+      );
+
+    if (!pertenece) {
+
+      throw AppError.forbidden(
+        'La mascota no pertenece al usuario autenticado'
+      );
     }
   }
 
-  const recepcionistaId = id_recepcionista || solicitante.id;
-  const recepcionista = await usuarioModel.findById(recepcionistaId);
-  if (!recepcionista) {
-    throw AppError.badRequest(`id_recepcionista (${recepcionistaId}) no existe en usuario`);
+
+  /*
+  |--------------------------------------------------------------------------
+  | Validar disponibilidad
+  |--------------------------------------------------------------------------
+  */
+
+  const disponibilidad =
+    await disponibilidadModel.findById(
+      id_disponibilidad
+    );
+
+  if (!disponibilidad) {
+
+    throw AppError.notFound(
+      `No existe disponibilidad con id ${id_disponibilidad}`
+    );
   }
 
-  let resultado;
+
+  if (
+    disponibilidad.estado !== 'disponible'
+  ) {
+
+    throw AppError.conflict(
+      'La disponibilidad seleccionada no está disponible'
+    );
+  }
+
+
+  /*
+  |--------------------------------------------------------------------------
+  | Determinar recepcionista
+  |--------------------------------------------------------------------------
+  */
+
+  let id_recepcionista;
+
+
+  if (
+    solicitante.rol === 'recepcionista'
+  ) {
+
+    id_recepcionista =
+      solicitante.id;
+
+  } else {
+
+    id_recepcionista =
+      await citaModel.obtenerPrimerRecepcionista();
+  }
+
+
+  if (!id_recepcionista) {
+
+    throw AppError.badRequest(
+      'No existe un recepcionista registrado para crear la cita'
+    );
+  }
+
+
+  /*
+  |--------------------------------------------------------------------------
+  | Crear cita
+  |--------------------------------------------------------------------------
+  */
+
   try {
-    resultado = await citaModel.createConTransaccion({
-      id_mascota,
-      id_disponibilidad,
-      id_recepcionista: recepcionistaId,
-      motivos,
-    });
-  } catch (err) {
-    if (err.code === 'DISPONIBILIDAD_NO_EXISTE') {
-      throw AppError.notFound(`No existe disponibilidad con id ${id_disponibilidad}`);
+
+    return await citaModel.crearConTransaccion(
+      {
+        id_mascota,
+        id_disponibilidad,
+        id_recepcionista,
+        motivo
+      }
+    );
+
+  } catch (error) {
+
+    /*
+    |--------------------------------------------------------------------------
+    | Disponibilidad inexistente
+    |--------------------------------------------------------------------------
+    */
+
+    if (
+      error.code ===
+      'DISPONIBILIDAD_NO_EXISTE'
+    ) {
+
+      throw AppError.notFound(
+        'La disponibilidad no existe'
+      );
     }
-    if (err.code === 'DISPONIBILIDAD_NO_LIBRE') {
-      throw AppError.conflict('La franja de disponibilidad seleccionada ya no esta libre');
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Disponibilidad ocupada
+    |--------------------------------------------------------------------------
+    */
+
+    if (
+      error.code ===
+      'DISPONIBILIDAD_NO_LIBRE'
+    ) {
+
+      throw AppError.conflict(
+        'La disponibilidad ya está ocupada'
+      );
     }
-    throw err;
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Restricción UNIQUE:
+    | una disponibilidad solo puede tener una cita
+    |--------------------------------------------------------------------------
+    */
+
+    if (
+      error.code === '23505'
+    ) {
+
+      throw AppError.conflict(
+        'La disponibilidad seleccionada ya tiene una cita'
+      );
+    }
+
+
+    throw error;
   }
-
-  await notificacionService.notificarNuevaCita({
-    veterinarioId: resultado.veterinarioId,
-    cita: resultado.cita,
-  });
-
-  return resultado.cita;
 }
 
-async function cambiarEstado(id_cita, estado) {
-  const cita = await obtenerPorId(id_cita);
 
-  if (estado === 'cdo') {
-    // Cancelar libera la franja de disponibilidad (transaccion dedicada).
-    const actualizada = await citaModel.cancelarConTransaccion(id_cita);
-    const disponibilidad = await disponibilidadModel.findById(cita.id_disponibilidad);
-    await notificacionService.notificarCambioEstadoCita({
-      veterinarioId: disponibilidad?.id_usuario,
-      cita: { ...cita, estado: actualizada.estado },
-    });
-    return actualizada;
+/*
+|--------------------------------------------------------------------------
+| EDITAR CITA
+|--------------------------------------------------------------------------
+*/
+
+async function editar(
+  id_cita,
+  cambios,
+  solicitante
+) {
+
+  const cita =
+    await obtenerPorId(
+      id_cita
+    );
+
+
+  /*
+  |--------------------------------------------------------------------------
+  | Usuario solamente puede editar sus propias mascotas
+  |--------------------------------------------------------------------------
+  */
+
+  if (
+    solicitante.rol === 'usuario'
+  ) {
+
+    const pertenece =
+      await mascotaModel.perteneceAUsuario(
+        cita.id_mascota,
+        solicitante.id
+      );
+
+    if (!pertenece) {
+
+      throw AppError.forbidden(
+        'No puede editar una cita de una mascota que no le pertenece'
+      );
+    }
   }
 
-  const actualizada = await citaModel.actualizarEstado(id_cita, estado);
-  await notificacionService.notificarCambioEstadoCita({
-    veterinarioId: cita.id_veterinario,
-    cita: actualizada,
-  });
-  return actualizada;
+
+  /*
+  |--------------------------------------------------------------------------
+  | Verificar nueva disponibilidad
+  |--------------------------------------------------------------------------
+  */
+
+  if (
+    cambios.id_disponibilidad &&
+    cambios.id_disponibilidad !==
+      cita.id_disponibilidad
+  ) {
+
+    const nuevaDisponibilidad =
+      await disponibilidadModel.findById(
+        cambios.id_disponibilidad
+      );
+
+    if (!nuevaDisponibilidad) {
+
+      throw AppError.notFound(
+        'La nueva disponibilidad no existe'
+      );
+    }
+
+
+    if (
+      nuevaDisponibilidad.estado !==
+      'disponible'
+    ) {
+
+      throw AppError.conflict(
+        'La nueva disponibilidad no está disponible'
+      );
+    }
+  }
+
+
+  return citaModel.editarConTransaccion(
+    id_cita,
+    cambios
+  );
 }
 
-module.exports = { listar, obtenerPorId, listarPorVeterinario, solicitar, cambiarEstado };
+
+/*
+|--------------------------------------------------------------------------
+| CANCELAR CITA
+|--------------------------------------------------------------------------
+*/
+
+async function cancelar(
+  id_cita,
+  solicitante
+) {
+
+  const cita =
+    await obtenerPorId(
+      id_cita
+    );
+
+
+  /*
+  |--------------------------------------------------------------------------
+  | Usuario solamente puede cancelar sus propias citas
+  |--------------------------------------------------------------------------
+  */
+
+  if (
+    solicitante.rol === 'usuario'
+  ) {
+
+    const pertenece =
+      await mascotaModel.perteneceAUsuario(
+        cita.id_mascota,
+        solicitante.id
+      );
+
+    if (!pertenece) {
+
+      throw AppError.forbidden(
+        'No puede cancelar una cita de una mascota que no le pertenece'
+      );
+    }
+  }
+
+
+  /*
+  |--------------------------------------------------------------------------
+  | Evitar cancelar dos veces
+  |--------------------------------------------------------------------------
+  */
+
+  if (
+    cita.estado === 'cancelado'
+  ) {
+
+    throw AppError.conflict(
+      'La cita ya está cancelada'
+    );
+  }
+
+
+  return citaModel.cancelarConTransaccion(
+    id_cita
+  );
+}
+
+
+module.exports = {
+  listar,
+  obtenerPorId,
+  listarPorEspecialista,
+  crear,
+  editar,
+  cancelar
+};

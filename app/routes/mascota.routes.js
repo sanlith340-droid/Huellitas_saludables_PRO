@@ -1,7 +1,7 @@
 /**
- * routes/index.js
+ * routes/mascota.routes.js
  * ---------------------------------------------------------
- * Registro central de las rutas de la API.
+ * Endpoints para consultar mascotas y sus propietarios.
  * ---------------------------------------------------------
  */
 
@@ -9,55 +9,34 @@ const {
   Router
 } = require('express');
 
-const mascotaRoutes = require('./mascota.routes');
-const usuarioRoutes = require('./usuario.routes');
-const citaRoutes = require('./cita.routes');
-const disponibilidadRoutes = require('./disponibilidad.routes');
+const controller = require('../controllers/mascota.controller');
 
 const router = Router();
 
 /*
 |--------------------------------------------------------------------------
-| MASCOTAS
+| GET /api/mascotas
+|--------------------------------------------------------------------------
+| Lista todas las mascotas junto con sus propietarios.
 |--------------------------------------------------------------------------
 */
 
-router.use(
-  '/mascotas',
-  mascotaRoutes
+router.get(
+  '/',
+  controller.listar
 );
 
 /*
 |--------------------------------------------------------------------------
-| USUARIOS
+| GET /api/mascotas/:id
+|--------------------------------------------------------------------------
+| Busca una mascota por su ID.
 |--------------------------------------------------------------------------
 */
 
-router.use(
-  '/usuarios',
-  usuarioRoutes
-);
-
-/*
-|--------------------------------------------------------------------------
-| CITAS
-|--------------------------------------------------------------------------
-*/
-
-router.use(
-  '/citas',
-  citaRoutes
-);
-
-/*
-|--------------------------------------------------------------------------
-| DISPONIBILIDAD
-|--------------------------------------------------------------------------
-*/
-
-router.use(
-  '/disponibilidad',
-  disponibilidadRoutes
+router.get(
+  '/:id',
+  controller.obtener
 );
 
 module.exports = router;

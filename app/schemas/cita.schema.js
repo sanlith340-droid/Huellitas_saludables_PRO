@@ -1,56 +1,122 @@
 /**
  * schemas/cita.schema.js
  * ---------------------------------------------------------
- * Reglas de validacion para la tabla "cita", basadas en el DDL
- * real (database/huellitas_saludables_backup.sql):
- *
- *   id_cita            SERIAL PK
- *   id_mascota         integer NOT NULL
- *   id_disponibilidad  integer NOT NULL
- *   id_recepcionista   varchar(15) NOT NULL
- *   motivos            text
- *   estado             varchar(10) DEFAULT 'p'  CHECK IN ('p','c','cdo')
- *   fecha_registro     timestamp DEFAULT now()
- *
- * NOTA sobre "estado": el CHECK de la base de datos solo permite
- * 'p' | 'c' | 'cdo'. En este modulo se documentan como:
- *   p   -> pendiente
- *   c   -> confirmada
- *   cdo -> cancelada
- * (ajustar aqui si el equipo definio otro significado).
+ * Validaciones de citas.
+ * Compatible con database/data_jesus.
  * ---------------------------------------------------------
  */
-const Joi = require('joi');
 
-const ESTADOS_CITA = ['p', 'c', 'cdo'];
+const Joi =
+  require('joi');
 
-const crearCitaSchema = Joi.object({
-  id_mascota: Joi.number().integer().positive().required(),
-  id_disponibilidad: Joi.number().integer().positive().required(),
-  motivos: Joi.string().max(1000).allow('', null),
-});
+const ESTADOS_CITA = [
+  'pendiente',
+  'confirmado',
+  'cancelado',
+  'atendido'
+];
 
-const actualizarEstadoCitaSchema = Joi.object({
-  estado: Joi.string()
-    .valid(...ESTADOS_CITA)
-    .required()
-    .messages({ 'any.only': `estado debe ser uno de: ${ESTADOS_CITA.join(', ')}` }),
-});
+/*
+|--------------------------------------------------------------------------
+| CREAR
+|--------------------------------------------------------------------------
+*/
 
-const idParamSchema = Joi.object({
-  id: Joi.number().integer().positive().required(),
-});
+const crearCitaSchema =
+  Joi.object({
 
-const listarCitasQuerySchema = Joi.object({
-  id_mascota: Joi.number().integer().positive(),
-  estado: Joi.string().valid(...ESTADOS_CITA),
-  fecha: Joi.date().iso(),
-});
+    id_mascota:
+      Joi.number()
+        .integer()
+        .positive()
+        .required(),
+
+    id_disponibilidad:
+      Joi.number()
+        .integer()
+        .positive()
+        .required(),
+
+    motivo:
+      Joi.string()
+        .max(200)
+        .required()
+  });
+
+/*
+|--------------------------------------------------------------------------
+| EDITAR
+|--------------------------------------------------------------------------
+*/
+
+const editarCitaSchema =
+  Joi.object({
+
+    id_mascota:
+      Joi.number()
+        .integer()
+        .positive(),
+
+    id_disponibilidad:
+      Joi.number()
+        .integer()
+        .positive(),
+
+    motivo:
+      Joi.string()
+        .max(200)
+  }).min(1);
+
+/*
+|--------------------------------------------------------------------------
+| ID
+|--------------------------------------------------------------------------
+*/
+
+const idParamSchema =
+  Joi.object({
+
+    id:
+      Joi.number()
+        .integer()
+        .positive()
+        .required()
+  });
+
+/*
+|--------------------------------------------------------------------------
+| FILTROS
+|--------------------------------------------------------------------------
+*/
+
+const listarCitasQuerySchema =
+  Joi.object({
+
+    id_mascota:
+      Joi.number()
+        .integer()
+        .positive(),
+
+    estado:
+      Joi.string()
+        .valid(
+          ...ESTADOS_CITA
+        ),
+
+    fecha:
+      Joi.date()
+        .iso(),
+
+    id_especialista:
+      Joi.string()
+        .max(10)
+  });
 
 module.exports = {
   ESTADOS_CITA,
   crearCitaSchema,
-  actualizarEstadoCitaSchema,
+  editarCitaSchema,
   idParamSchema,
-  listarCitasQuerySchema,
+  listarCitasQuerySchema
 };
+
