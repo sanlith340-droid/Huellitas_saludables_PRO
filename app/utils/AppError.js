@@ -1,15 +1,8 @@
 /**
  * utils/AppError.js
- * ---------------------------------------------------------
- * Error de aplicacion "controlado". Los services lo lanzan
- * cuando una regla de negocio no se cumple (ej: disponibilidad
- * ya ocupada, mascota inexistente, rol invalido, etc).
- *
- * El errorHandler central lo distingue de errores no esperados
- * (bugs, fallos de conexion) para responder con el codigo HTTP
- * y mensaje correctos, sin exponer detalles internos.
- * ---------------------------------------------------------
+ * Errores personalizados de la aplicación.
  */
+
 class AppError extends Error {
   constructor(message, statusCode = 400, code = 'BAD_REQUEST') {
     super(message);
@@ -24,15 +17,15 @@ class AppError extends Error {
     return new AppError(message, 404, 'NOT_FOUND');
   }
 
-  static badRequest(message = 'Solicitud invalida') {
+  static badRequest(message = 'Solicitud inválida') {
     return new AppError(message, 400, 'BAD_REQUEST');
   }
 
-  static conflict(message = 'Conflicto con el estado actual del recurso') {
+  static conflict(message = 'Conflicto con el estado actual') {
     return new AppError(message, 409, 'CONFLICT');
   }
 
-  static forbidden(message = 'No tiene permisos para realizar esta accion') {
+  static forbidden(message = 'No tiene permisos') {
     return new AppError(message, 403, 'FORBIDDEN');
   }
 

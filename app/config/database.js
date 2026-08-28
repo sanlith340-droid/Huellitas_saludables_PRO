@@ -1,17 +1,6 @@
 /**
  * config/database.js
- * ---------------------------------------------------------
- * Configuracion del pool de conexiones a PostgreSQL.
- *
- * Por decision del equipo, en esta fase del proyecto NO se usa
- * un ORM (Sequelize, Prisma, TypeORM, etc). Todas las consultas
- * se escriben en SQL puro y se ejecutan a traves de este pool,
- * usando el driver oficial "pg".
- *
- * Motivo: permite validar el modelo entidad-relacion real
- * (huellitas_saludables_backup.sql) contra consultas explicitas
- * antes de introducir una capa de abstraccion adicional.
- * ---------------------------------------------------------
+ * Configuración del pool de conexiones a PostgreSQL.
  */
 
 require('dotenv').config();
@@ -29,15 +18,9 @@ const pool = new Pool({
 });
 
 pool.on('error', (err) => {
-  // Errores en clientes inactivos del pool (no rompen una request en curso)
-  console.error('[db] Error inesperado en cliente inactivo del pool:', err.message);
+  console.error('[db] Error inesperado:', err.message);
 });
 
-/**
- * Ejecuta una consulta simple contra el pool.
- * @param {string} text - Sentencia SQL parametrizada ($1, $2, ...)
- * @param {Array} params - Parametros de la consulta
- */
 async function query(text, params) {
   const start = Date.now();
   const result = await pool.query(text, params);
@@ -48,10 +31,6 @@ async function query(text, params) {
   return result;
 }
 
-/**
- * Obtiene un cliente dedicado del pool para ejecutar transacciones
- * (BEGIN / COMMIT / ROLLBACK). Debe liberarse siempre con client.release().
- */
 async function getClient() {
   const client = await pool.connect();
   return client;

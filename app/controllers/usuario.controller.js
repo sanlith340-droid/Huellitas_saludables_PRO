@@ -1,66 +1,38 @@
 /**
  * controllers/usuario.controller.js
- * ---------------------------------------------------------
  * Controlador de usuarios.
- * ---------------------------------------------------------
  */
 
-const usuarioService =
-  require('../services/usuario.service');
+const usuarioService = require('../services/usuario.service');
+const asyncHandler = require('../utils/asyncHandler');
+const { ok } = require('../utils/response');
+const AppError = require('../utils/AppError');
 
-const asyncHandler =
-  require('../utils/asyncHandler');
+/**
+ * Busca un usuario por su número de documento/ID
+ * GET /api/usuarios/:documento
+ */
+const obtenerPorDocumento = asyncHandler(async (req, res) => {
+  const { documento } = req.params;
 
-const {
-  ok
-} = require('../utils/response');
+  if (!documento || documento.trim().length === 0) {
+    throw AppError.badRequest('El ID del usuario es requerido');
+  }
 
-/*
-|--------------------------------------------------------------------------
-| BUSCAR USUARIO POR DOCUMENTO / ID
-|--------------------------------------------------------------------------
-*/
+  const usuario = await usuarioService.obtenerPorDocumento(documento);
+  return ok(res, usuario, 'Usuario encontrado correctamente');
+});
 
-const obtenerPorDocumento =
-  asyncHandler(
-    async (req, res) => {
-
-      const usuario =
-        await usuarioService.obtenerPorDocumento(
-          req.params.documento
-        );
-
-      return ok(
-        res,
-        usuario,
-        'Usuario encontrado correctamente'
-      );
-    }
-  );
-
-/*
-|--------------------------------------------------------------------------
-| LISTAR ESPECIALISTAS
-|--------------------------------------------------------------------------
-*/
-
-const listarEspecialistas =
-  asyncHandler(
-    async (_req, res) => {
-
-      const especialistas =
-        await usuarioService.listarEspecialistas();
-
-      return ok(
-        res,
-        especialistas,
-        'Especialistas listados correctamente'
-      );
-    }
-  );
+/**
+ * Lista todos los especialistas
+ * GET /api/usuarios/especialistas
+ */
+const listarEspecialistas = asyncHandler(async (req, res) => {
+  const especialistas = await usuarioService.listarEspecialistas();
+  return ok(res, especialistas, 'Especialistas listados correctamente');
+});
 
 module.exports = {
   obtenerPorDocumento,
   listarEspecialistas
 };
-

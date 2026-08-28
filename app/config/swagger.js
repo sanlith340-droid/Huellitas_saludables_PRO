@@ -3,34 +3,27 @@ const swaggerJsdoc = require('swagger-jsdoc');
 const options = {
   definition: {
     openapi: '3.0.0',
-
     info: {
       title: 'Huellitas Saludables API',
       version: '1.0.0',
-      description:
-        'API para gestión de mascotas, usuarios, citas y disponibilidad veterinaria',
+      description: 'API para gestión de mascotas, usuarios, citas y disponibilidad veterinaria',
     },
-
     servers: [
       {
         url: 'http://localhost:3000',
         description: 'Servidor local',
       },
     ],
-
     components: {
       parameters: {
         UserId: {
           name: 'x-user-id',
           in: 'header',
           required: true,
-          description: 'Documento o ID del usuario autenticado',
-          schema: {
-            type: 'string',
-          },
-          example: '1000000001',
+          description: 'ID del usuario autenticado (ej: USU001, ESP001, REC001)',
+          schema: { type: 'string' },
+          example: 'USU001',
         },
-
         UserRole: {
           name: 'x-user-role',
           in: 'header',
@@ -38,196 +31,184 @@ const options = {
           description: 'Rol del usuario',
           schema: {
             type: 'string',
-            enum: [
-            'usuario',
-            'recepcionista',
-            'especialista',
-            'admin',
-             ],
+            enum: ['usuario', 'recepcionista', 'especialista', 'admin'],
           },
           example: 'usuario',
         },
       },
-
-      schemas: {
-        CrearCita: {
-          type: 'object',
-
-          required: [
-            'id_mascota',
-            'id_disponibilidad',
-          ],
-
-          properties: {
-            id_mascota: {
-              type: 'integer',
-              minimum: 1,
-              example: 1,
-            },
-
-            id_disponibilidad: {
-              type: 'integer',
-              minimum: 1,
-              example: 9,
-            },
-
-            motivos: {
-              type: 'string',
-              maxLength: 1000,
-              nullable: true,
-              example: 'Consulta de prueba desde Swagger',
-            },
-          },
-        },
-
-        ActualizarEstadoCita: {
-          type: 'object',
-
-          required: [
-            'estado',
-          ],
-
-          properties: {
-            estado: {
-              type: 'string',
-              enum: [
-                'p',
-                'c',
-                'cdo',
-              ],
-              example: 'c',
-            },
-          },
-        },
-      },
     },
-
     paths: {
-      /*
-       * -----------------------------------------------------------------------
-       * USUARIOS
-       * -----------------------------------------------------------------------
-       */
-
-      '/api/usuarios/veterinarios': {
+      '/api/usuarios/especialistas': {
         get: {
-          summary: 'Listar veterinarios',
-
-          description:
-            'Obtiene la lista de especialistas/veterinarios registrados en la base de datos.',
-
-          tags: [
-            'Usuarios',
-          ],
-
+          summary: 'Listar especialistas',
+          tags: ['Usuarios'],
           parameters: [
-            {
-              $ref: '#/components/parameters/UserId',
-            },
-
-            {
-              $ref: '#/components/parameters/UserRole',
-            },
+            { $ref: '#/components/parameters/UserId' },
+            { $ref: '#/components/parameters/UserRole' },
           ],
-
           responses: {
-            200: {
-              description:
-                'Especialistas listados correctamente',
-            },
-
-            401: {
-              description:
-                'Usuario no autenticado',
-            },
-
-            500: {
-              description:
-                'Error interno del servidor',
-            },
+            200: { description: 'Especialistas listados correctamente' },
+            401: { description: 'Usuario no autenticado' },
           },
         },
       },
-
-      /*
-       * -----------------------------------------------------------------------
-       * BUSCAR USUARIO POR DOCUMENTO
-       * -----------------------------------------------------------------------
-       */
-
       '/api/usuarios/{documento}': {
         get: {
           summary: 'Buscar usuario por documento',
-
-          description:
-            'Obtiene un usuario utilizando su documento como identificador.',
-
-          tags: [
-            'Usuarios',
-          ],
-
+          tags: ['Usuarios'],
           parameters: [
             {
               name: 'documento',
               in: 'path',
               required: true,
-
-              description:
-                'Documento o ID del usuario',
-
-              schema: {
-                type: 'string',
-              },
-
-              example: '1000000001',
+              schema: { type: 'string' },
+              example: 'USU001',
             },
-
-            {
-              $ref: '#/components/parameters/UserId',
-            },
-
-            {
-              $ref: '#/components/parameters/UserRole',
-            },
+            { $ref: '#/components/parameters/UserId' },
+            { $ref: '#/components/parameters/UserRole' },
           ],
-
           responses: {
-            200: {
-              description:
-                'Usuario encontrado correctamente',
+            200: { description: 'Usuario encontrado correctamente' },
+            404: { description: 'Usuario no encontrado' },
+          },
+        },
+      },
+      '/api/mascotas': {
+        get: {
+          summary: 'Listar todas las mascotas',
+          tags: ['Mascotas'],
+          parameters: [
+            { $ref: '#/components/parameters/UserId' },
+            { $ref: '#/components/parameters/UserRole' },
+          ],
+          responses: {
+            200: { description: 'Mascotas listadas correctamente' },
+          },
+        },
+      },
+      '/api/mascotas/{id}': {
+        get: {
+          summary: 'Obtener mascota por ID',
+          tags: ['Mascotas'],
+          parameters: [
+            {
+              name: 'id',
+              in: 'path',
+              required: true,
+              schema: { type: 'integer' },
+              example: 1,
             },
-
-            404: {
-              description:
-                'Usuario no encontrado',
+            { $ref: '#/components/parameters/UserId' },
+            { $ref: '#/components/parameters/UserRole' },
+          ],
+          responses: {
+            200: { description: 'Mascota encontrada correctamente' },
+            404: { description: 'Mascota no encontrada' },
+          },
+        },
+      },
+      '/api/disponibilidad': {
+        get: {
+          summary: 'Listar disponibilidades',
+          tags: ['Disponibilidad'],
+          parameters: [
+            {
+              name: 'id_usuario',
+              in: 'query',
+              schema: { type: 'string' },
+              description: 'Filtrar por ID de especialista',
             },
-
-            401: {
-              description:
-                'Usuario no autenticado',
+            {
+              name: 'fecha',
+              in: 'query',
+              schema: { type: 'string', format: 'date' },
+              description: 'Filtrar por fecha (YYYY-MM-DD)',
             },
-
-            500: {
-              description:
-                'Error interno del servidor',
+            { $ref: '#/components/parameters/UserId' },
+            { $ref: '#/components/parameters/UserRole' },
+          ],
+          responses: {
+            200: { description: 'Disponibilidades listadas correctamente' },
+          },
+        },
+      },
+      '/api/citas': {
+        get: {
+          summary: 'Listar citas',
+          tags: ['Citas'],
+          parameters: [
+            {
+              name: 'estado',
+              in: 'query',
+              schema: { type: 'string', enum: ['pendiente', 'confirmado', 'cancelado', 'atendido'] },
             },
+            {
+              name: 'fecha',
+              in: 'query',
+              schema: { type: 'string', format: 'date' },
+            },
+            { $ref: '#/components/parameters/UserId' },
+            { $ref: '#/components/parameters/UserRole' },
+          ],
+          responses: {
+            200: { description: 'Citas listadas correctamente' },
+          },
+        },
+        post: {
+          summary: 'Crear cita',
+          tags: ['Citas'],
+          parameters: [
+            { $ref: '#/components/parameters/UserId' },
+            { $ref: '#/components/parameters/UserRole' },
+          ],
+          requestBody: {
+            required: true,
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  required: ['id_mascota', 'id_disponibilidad'],
+                  properties: {
+                    id_mascota: { type: 'integer', example: 1 },
+                    id_disponibilidad: { type: 'integer', example: 1 },
+                    motivo: { type: 'string', example: 'Consulta general' },
+                  },
+                },
+              },
+            },
+          },
+          responses: {
+            201: { description: 'Cita creada correctamente' },
+            400: { description: 'Datos inválidos' },
+            409: { description: 'Conflicto - disponibilidad ocupada' },
+          },
+        },
+      },
+      '/api/citas/{id}/cancelar': {
+        patch: {
+          summary: 'Cancelar cita',
+          tags: ['Citas'],
+          parameters: [
+            {
+              name: 'id',
+              in: 'path',
+              required: true,
+              schema: { type: 'integer' },
+            },
+            { $ref: '#/components/parameters/UserId' },
+            { $ref: '#/components/parameters/UserRole' },
+          ],
+          responses: {
+            200: { description: 'Cita cancelada correctamente' },
+            404: { description: 'Cita no encontrada' },
+            409: { description: 'Cita ya cancelada' },
           },
         },
       },
     },
   },
-
-  /*
-   * swagger-jsdoc requiere que "apis" exista
-   * y sea un arreglo.
-   *
-   * Las rutas se están definiendo directamente
-   * dentro de definition.paths.
-   */
-
   apis: [],
 };
 
 const swaggerSpec = swaggerJsdoc(options);
-
 module.exports = swaggerSpec;

@@ -1,162 +1,83 @@
 /**
  * controllers/cita.controller.js
- * ---------------------------------------------------------
  * Controlador de citas.
- * ---------------------------------------------------------
  */
 
-const citaService =
-  require('../services/cita.service');
+const citaService = require('../services/cita.service');
+const asyncHandler = require('../utils/asyncHandler');
+const { ok, created } = require('../utils/response');
+const AppError = require('../utils/AppError');
 
-const asyncHandler =
-  require('../utils/asyncHandler');
+/**
+ * Lista todas las citas con filtros opcionales
+ * GET /api/citas
+ */
+const listar = asyncHandler(async (req, res) => {
+  const citas = await citaService.listar(req.query);
+  return ok(res, citas, 'Citas listadas correctamente');
+});
 
-const {
-  ok,
-  created
-} = require('../utils/response');
+/**
+ * Obtiene una cita por su ID
+ * GET /api/citas/:id
+ */
+const obtener = asyncHandler(async (req, res) => {
+  const cita = await citaService.obtenerPorId(req.params.id);
+  return ok(res, cita, 'Cita encontrada correctamente');
+});
 
-/*
-|--------------------------------------------------------------------------
-| LISTAR
-|--------------------------------------------------------------------------
-*/
+/**
+ * Lista las citas de un especialista específico
+ * GET /api/citas/especialista/:id_especialista
+ */
+const listarPorEspecialista = asyncHandler(async (req, res) => {
+  const { id_especialista } = req.params;
+  const citas = await citaService.listarPorEspecialista(id_especialista);
+  return ok(res, citas, 'Citas del especialista listadas correctamente');
+});
 
-const listar =
-  asyncHandler(
-    async (req, res) => {
+/**
+ * Crea una nueva cita
+ * POST /api/citas
+ */
+const crear = asyncHandler(async (req, res) => {
+  if (!req.user) {
+    throw AppError.unauthorized('Usuario no autenticado');
+  }
 
-      const citas =
-        await citaService.listar(
-          req.query
-        );
+  const cita = await citaService.crear({
+    ...req.body,
+    solicitante: req.user
+  });
 
-      return ok(
-        res,
-        citas,
-        'Citas listadas correctamente'
-      );
-    }
-  );
+  return created(res, cita, 'Cita creada correctamente');
+});
 
-/*
-|--------------------------------------------------------------------------
-| OBTENER
-|--------------------------------------------------------------------------
-*/
+/**
+ * Edita una cita existente
+ * PUT /api/citas/:id
+ */
+const editar = asyncHandler(async (req, res) => {
+  if (!req.user) {
+    throw AppError.unauthorized('Usuario no autenticado');
+  }
 
-const obtener =
-  asyncHandler(
-    async (req, res) => {
+  const cita = await citaService.editar(req.params.id, req.body, req.user);
+  return ok(res, cita, 'Cita editada correctamente');
+});
 
-      const cita =
-        await citaService.obtenerPorId(
-          req.params.id
-        );
+/**
+ * Cancela una cita
+ * PATCH /api/citas/:id/cancelar
+ */
+const cancelar = asyncHandler(async (req, res) => {
+  if (!req.user) {
+    throw AppError.unauthorized('Usuario no autenticado');
+  }
 
-      return ok(
-        res,
-        cita,
-        'Cita encontrada correctamente'
-      );
-    }
-  );
-
-/*
-|--------------------------------------------------------------------------
-| CITAS POR ESPECIALISTA
-|--------------------------------------------------------------------------
-*/
-
-const listarPorEspecialista =
-  asyncHandler(
-    async (req, res) => {
-
-      const citas =
-        await citaService.listarPorEspecialista(
-          req.params.id_especialista
-        );
-
-      return ok(
-        res,
-        citas,
-        'Citas del especialista listadas correctamente'
-      );
-    }
-  );
-
-/*
-|--------------------------------------------------------------------------
-| CREAR CITA
-|--------------------------------------------------------------------------
-*/
-
-const crear =
-  asyncHandler(
-    async (req, res) => {
-
-      const cita =
-        await citaService.crear({
-          ...req.body,
-          solicitante: req.user
-        });
-
-      return created(
-        res,
-        cita,
-        'Cita creada correctamente'
-      );
-    }
-  );
-
-/*
-|--------------------------------------------------------------------------
-| EDITAR CITA
-|--------------------------------------------------------------------------
-*/
-
-const editar =
-  asyncHandler(
-    async (req, res) => {
-
-      const cita =
-        await citaService.editar(
-          req.params.id,
-          req.body,
-          req.user
-        );
-
-      return ok(
-        res,
-        cita,
-        'Cita editada correctamente'
-      );
-    }
-  );
-
-/*
-|--------------------------------------------------------------------------
-| CANCELAR CITA
-|--------------------------------------------------------------------------
-*/
-
-const cancelar =
-  asyncHandler(
-    async (req, res) => {
-
-      const cita =
-        await citaService.cancelar(
-          req.params.id,
-          req.user
-        );
-
-      return ok(
-        res,
-        cita,
-        'Cita cancelada correctamente'
-      );
-    }
-  );
+  const cita = await citaService.cancelar(req.params.id, req.user);
+  return ok(res, cita, 'Cita cancelada correctamente');
+});
 
 module.exports = {
   listar,
@@ -166,4 +87,3 @@ module.exports = {
   editar,
   cancelar
 };
-

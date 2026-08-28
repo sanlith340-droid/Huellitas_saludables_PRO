@@ -1,20 +1,6 @@
 /**
  * middlewares/auditLog.js
- * ---------------------------------------------------------
- * RF15: "El sistema registrara acciones realizadas por
- * administradores y agendadores para control y auditoria."
- *
- * NOTA: el modelo entidad-relacion actual (huellitas_saludables_backup.sql)
- * todavia NO incluye una tabla de auditoria. Para no modificar el
- * esquema de base de datos sin autorizacion del equipo, este
- * middleware deja el registro en consola/log con formato
- * estructurado, listo para conectarse a una tabla "auditoria"
- * el dia que se agregue (bastaria con reemplazar el console.log
- * por un INSERT usando app/config/database.js).
- *
- * Se activa solo para roles con permisos administrativos, sobre
- * operaciones que modifican datos (POST, PUT, PATCH, DELETE).
- * ---------------------------------------------------------
+ * Registro de auditoría para acciones administrativas.
  */
 
 const ROLES_AUDITADOS = ['recepcionista', 'admin'];
@@ -35,7 +21,6 @@ function auditLog(req, res, next) {
       resultado: res.statusCode,
     };
 
-    // TODO: reemplazar por INSERT en tabla "auditoria" cuando exista en el modelo.
     console.log('[auditoria]', JSON.stringify(registro));
   });
 

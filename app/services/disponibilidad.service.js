@@ -1,246 +1,85 @@
 /**
  * services/disponibilidad.service.js
- * ---------------------------------------------------------
  * Lógica de negocio de disponibilidad.
- * ---------------------------------------------------------
  */
 
-const disponibilidadModel =
-  require('../models/disponibilidad.model');
-
-const usuarioModel =
-  require('../models/usuario.model');
-
-const AppError =
-  require('../utils/AppError');
-
-
-/*
-|--------------------------------------------------------------------------
-| LISTAR
-|--------------------------------------------------------------------------
-*/
+const disponibilidadModel = require('../models/disponibilidad.model');
+const usuarioModel = require('../models/usuario.model');
+const AppError = require('../utils/AppError');
 
 async function listar(filtros) {
-
-  return disponibilidadModel.findAll(
-    filtros
-  );
+  return disponibilidadModel.findAll(filtros);
 }
 
-
-/*
-|--------------------------------------------------------------------------
-| OBTENER
-|--------------------------------------------------------------------------
-*/
-
 async function obtenerPorId(id) {
-
-  const disponibilidad =
-    await disponibilidadModel.findById(
-      id
-    );
-
+  const disponibilidad = await disponibilidadModel.findById(id);
   if (!disponibilidad) {
-
-    throw AppError.notFound(
-      `No existe disponibilidad con id ${id}`
-    );
+    throw AppError.notFound(`No existe disponibilidad con id ${id}`);
   }
-
   return disponibilidad;
 }
 
-
-/*
-|--------------------------------------------------------------------------
-| CREAR
-|--------------------------------------------------------------------------
-*/
-
 async function crear(datos) {
-
-  /*
-  |--------------------------------------------------------------------------
-  | Verificar que el usuario exista y sea especialista
-  |--------------------------------------------------------------------------
-  */
-
-  const especialista =
-    await usuarioModel.findByIdAndRol(
-      datos.id_usuario,
-      'especialista'
-    );
-
+  // Verificar que el usuario exista y sea especialista
+  const especialista = await usuarioModel.findByIdAndRol(datos.id_usuario, 'especialista');
   if (!especialista) {
-
-    throw AppError.badRequest(
-      `El usuario ${datos.id_usuario} no es un especialista`
-    );
+    throw AppError.badRequest(`El usuario ${datos.id_usuario} no es un especialista`);
   }
 
+  // Verificar que no exista el mismo horario
+  const existentes = await disponibilidadModel.findAll({
+    id_usuario: datos.id_usuario,
+    fecha: datos.fecha
+  });
 
-  /*
-  |--------------------------------------------------------------------------
-  | Verificar que no exista el mismo horario
-  |--------------------------------------------------------------------------
-  */
-
-  const existentes =
-    await disponibilidadModel.findAll({
-      id_usuario: datos.id_usuario,
-      fecha: datos.fecha
-    });
-
-
-  const mismoHorario =
-    existentes.some(
-      item =>
-        String(item.hora) ===
-        String(datos.hora)
-    );
-
-
+  const mismoHorario = existentes.some(item => String(item.hora) === String(datos.hora));
   if (mismoHorario) {
-
-    throw AppError.conflict(
-      'El especialista ya tiene una disponibilidad para esa fecha y hora'
-    );
+    throw AppError.conflict('El especialista ya tiene una disponibilidad para esa fecha y hora');
   }
-
-
-  /*
-  |--------------------------------------------------------------------------
-  | Crear disponibilidad
-  |--------------------------------------------------------------------------
-  */
 
   try {
-
-    return await disponibilidadModel.create(
-      {
-        id_usuario: datos.id_usuario,
-        fecha: datos.fecha,
-        hora: datos.hora,
-        estado: datos.estado || 'disponible'
-      }
-    );
-
+    return await disponibilidadModel.create({
+      id_usuario: datos.id_usuario,
+      fecha: datos.fecha,
+      hora: datos.hora,
+      estado: datos.estado || 'disponible'
+    });
   } catch (error) {
-
-    /*
-    |--------------------------------------------------------------------------
-    | Restricción UNIQUE de PostgreSQL
-    |--------------------------------------------------------------------------
-    */
-
     if (error.code === '23505') {
-
-      throw AppError.conflict(
-        'Ya existe una disponibilidad para ese especialista, fecha y hora'
-      );
+      throw AppError.conflict('Ya existe una disponibilidad para ese especialista, fecha y hora');
     }
-
     throw error;
   }
 }
 
+async function actualizar(id, cambios) {
+  const actual = await obtenerPorId(id);
 
-/*
-|--------------------------------------------------------------------------
-| ACTUALIZAR
-|--------------------------------------------------------------------------
-*/
-
-async function actualizar(
-  id,
-  cambios
-) {
-
-  const actual =
-    await obtenerPorId(id);
-
-
-  /*
-  |--------------------------------------------------------------------------
-  | No modificar horario/especialista
-  | si la disponibilidad está ocupada
-  |--------------------------------------------------------------------------
-  */
-
-  if (
-    actual.estado === 'ocupado' &&
-    (
-      cambios.fecha !== undefined ||
-      cambios.hora !== undefined ||
-      cambios.id_usuario !== undefined
-    )
-  ) {
-
-    throw AppError.conflict(
-      'No se puede modificar fecha, hora o especialista de una disponibilidad ocupada'
-    );
+  // No modificar si está ocupada
+  if (actual.estado === 'ocupado' && (cambios.fecha !== undefined || cambios.hora !== undefined || cambios.id_usuario !== undefined)) {
+    throw AppError.conflict('No se puede modificar fecha, hora o especialista de una disponibilidad ocupada');
   }
 
-
-  /*
-  |--------------------------------------------------------------------------
-  | Si cambia especialista, validar rol
-  |--------------------------------------------------------------------------
-  */
-
+  // Si cambia especialista, validar rol
   if (cambios.id_usuario) {
-
-    const especialista =
-      await usuarioModel.findByIdAndRol(
-        cambios.id_usuario,
-        'especialista'
-      );
-
+    const especialista = await usuarioModel.findByIdAndRol(cambios.id_usuario, 'especialista');
     if (!especialista) {
-
-      throw AppError.badRequest(
-        'El nuevo usuario no es un especialista'
-      );
+      throw AppError.badRequest('El nuevo usuario no es un especialista');
     }
   }
 
-
-  return disponibilidadModel.update(
-    id,
-    cambios
-  );
+  return disponibilidadModel.update(id, cambios);
 }
-
-
-/*
-|--------------------------------------------------------------------------
-| ELIMINAR
-|--------------------------------------------------------------------------
-*/
 
 async function eliminar(id) {
+  const actual = await obtenerPorId(id);
 
-  const actual =
-    await obtenerPorId(id);
-
-
-  if (
-    actual.estado === 'ocupado'
-  ) {
-
-    throw AppError.conflict(
-      'No se puede eliminar una disponibilidad ocupada'
-    );
+  if (actual.estado === 'ocupado') {
+    throw AppError.conflict('No se puede eliminar una disponibilidad ocupada');
   }
 
-
-  return disponibilidadModel.remove(
-    id
-  );
+  return disponibilidadModel.remove(id);
 }
-
 
 module.exports = {
   listar,

@@ -1,13 +1,9 @@
 /**
  * routes/index.js
- * ---------------------------------------------------------
  * Registro central de las rutas de la API.
- * ---------------------------------------------------------
  */
 
-const {
-  Router
-} = require('express');
+const { Router } = require('express');
 
 const mascotaRoutes = require('./mascota.routes');
 const usuarioRoutes = require('./usuario.routes');
@@ -16,49 +12,9 @@ const disponibilidadRoutes = require('./disponibilidad.routes');
 
 const router = Router();
 
-/*
-|--------------------------------------------------------------------------
-| MASCOTAS
-|--------------------------------------------------------------------------
-*/
-
-router.use(
-  '/mascotas',
-  mascotaRoutes
-);
-
-/*
-|--------------------------------------------------------------------------
-| USUARIOS
-|--------------------------------------------------------------------------
-*/
-
-router.use(
-  '/usuarios',
-  usuarioRoutes
-);
-
-/*
-|--------------------------------------------------------------------------
-| CITAS
-|--------------------------------------------------------------------------
-*/
-
-router.use(
-  '/citas',
-  citaRoutes
-);
-
-/*
-|--------------------------------------------------------------------------
-| DISPONIBILIDAD
-|--------------------------------------------------------------------------
-*/
-
-router.use(
-  '/disponibilidad',
-  disponibilidadRoutes
-);
+router.use('/mascotas', mascotaRoutes);
+router.use('/usuarios', usuarioRoutes);
+router.use('/citas', citaRoutes);
+router.use('/disponibilidad', disponibilidadRoutes);
 
 module.exports = router;
-

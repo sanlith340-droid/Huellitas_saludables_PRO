@@ -1,160 +1,51 @@
 /**
  * routes/cita.routes.js
- * ---------------------------------------------------------
  * Endpoints de citas.
- * ---------------------------------------------------------
  */
 
-const {
-  Router
-} = require('express');
-
-const controller =
-  require('../controllers/cita.controller');
-
-const validate =
-  require('../middlewares/validate');
-
-const {
-  requireRole
-} = require('../middlewares/identifyUser');
-
+const { Router } = require('express');
+const controller = require('../controllers/cita.controller');
+const validate = require('../middlewares/validate');
+const { requireRole } = require('../middlewares/identifyUser');
 const {
   crearCitaSchema,
-  editarCitaSchema,
   idParamSchema,
   listarCitasQuerySchema
 } = require('../schemas/cita.schema');
 
-const Joi = require('joi');
-
 const router = Router();
 
-/*
-|--------------------------------------------------------------------------
-| LISTAR CITAS
-|--------------------------------------------------------------------------
-| GET /api/citas
-|--------------------------------------------------------------------------
-*/
+// Listar citas (todos los roles autenticados)
+router.get('/', validate(listarCitasQuerySchema, 'query'), controller.listar);
 
-router.get(
-  '/',
-  validate(
-    listarCitasQuerySchema,
-    'query'
-  ),
-  controller.listar
-);
+// Obtener cita por ID
+router.get('/:id', validate(idParamSchema, 'params'), controller.obtener);
 
-/*
-|--------------------------------------------------------------------------
-| CITAS DE UN ESPECIALISTA
-|--------------------------------------------------------------------------
-| GET /api/citas/especialista/ESP001
-|--------------------------------------------------------------------------
-*/
+// Listar citas por especialista
+router.get('/especialista/:id_especialista', controller.listarPorEspecialista);
 
-router.get(
-  '/especialista/:id_especialista',
-  validate(
-    Joi.object({
-      id_especialista:
-        Joi.string()
-          .max(10)
-          .required()
-    }),
-    'params'
-  ),
-  controller.listarPorEspecialista
-);
-
-/*
-|--------------------------------------------------------------------------
-| OBTENER CITA POR ID
-|--------------------------------------------------------------------------
-| GET /api/citas/1
-|--------------------------------------------------------------------------
-*/
-
-router.get(
-  '/:id',
-  validate(
-    idParamSchema,
-    'params'
-  ),
-  controller.obtener
-);
-
-/*
-|--------------------------------------------------------------------------
-| CREAR CITA
-|--------------------------------------------------------------------------
-| POST /api/citas
-|--------------------------------------------------------------------------
-*/
-
+// Crear cita (usuarios, recepcionistas, admin)
 router.post(
   '/',
-  requireRole(
-    'usuario',
-    'recepcionista',
-    'admin'
-  ),
-  validate(
-    crearCitaSchema,
-    'body'
-  ),
+  requireRole('usuario', 'recepcionista', 'admin'),
+  validate(crearCitaSchema, 'body'),
   controller.crear
 );
 
-/*
-|--------------------------------------------------------------------------
-| EDITAR CITA
-|--------------------------------------------------------------------------
-| PUT /api/citas/:id
-|--------------------------------------------------------------------------
-*/
-
+// Editar cita
 router.put(
   '/:id',
-  requireRole(
-    'usuario',
-    'recepcionista',
-    'admin'
-  ),
-  validate(
-    idParamSchema,
-    'params'
-  ),
-  validate(
-    editarCitaSchema,
-    'body'
-  ),
+  requireRole('usuario', 'recepcionista', 'admin'),
+  validate(idParamSchema, 'params'),
   controller.editar
 );
 
-/*
-|--------------------------------------------------------------------------
-| CANCELAR CITA
-|--------------------------------------------------------------------------
-| PATCH /api/citas/:id/cancelar
-|--------------------------------------------------------------------------
-*/
-
+// Cancelar cita
 router.patch(
   '/:id/cancelar',
-  requireRole(
-    'usuario',
-    'recepcionista',
-    'admin'
-  ),
-  validate(
-    idParamSchema,
-    'params'
-  ),
+  requireRole('usuario', 'recepcionista', 'admin'),
+  validate(idParamSchema, 'params'),
   controller.cancelar
 );
 
 module.exports = router;
-
