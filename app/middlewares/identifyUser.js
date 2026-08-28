@@ -1,6 +1,8 @@
 /**
  * middlewares/identifyUser.js
+ * ---------------------------------------------------------
  * Autenticación mediante headers (x-user-id, x-user-role).
+ * ---------------------------------------------------------
  */
 
 const { query } = require('../config/database');
@@ -18,7 +20,6 @@ const identifyUser = async (req, res, next) => {
       });
     }
 
-    // Buscar usuario en BD
     const result = await query(
       `SELECT id_usuario, rol FROM usuario WHERE id_usuario = $1 LIMIT 1`,
       [String(userId).trim()]

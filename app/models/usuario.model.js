@@ -1,9 +1,17 @@
 /**
  * models/usuario.model.js
+ * ---------------------------------------------------------
  * Consultas SQL de usuarios.
+ * ---------------------------------------------------------
  */
 
 const { query } = require('../config/database');
+
+/*
+|--------------------------------------------------------------------------
+| BUSCAR POR ID
+|--------------------------------------------------------------------------
+*/
 
 async function findById(id_usuario) {
   const sql = `
@@ -26,6 +34,12 @@ async function findById(id_usuario) {
   return rows[0] || null;
 }
 
+/*
+|--------------------------------------------------------------------------
+| BUSCAR POR ID Y ROL
+|--------------------------------------------------------------------------
+*/
+
 async function findByIdAndRol(id_usuario, rol) {
   const sql = `
     SELECT
@@ -46,6 +60,12 @@ async function findByIdAndRol(id_usuario, rol) {
   const { rows } = await query(sql, [id_usuario, rol]);
   return rows[0] || null;
 }
+
+/*
+|--------------------------------------------------------------------------
+| BUSCAR POR DOCUMENTO
+|--------------------------------------------------------------------------
+*/
 
 async function findByDocumento(documento) {
   const sql = `
@@ -68,6 +88,12 @@ async function findByDocumento(documento) {
   return rows[0] || null;
 }
 
+/*
+|--------------------------------------------------------------------------
+| LISTAR ESPECIALISTAS
+|--------------------------------------------------------------------------
+*/
+
 async function findEspecialistas() {
   const sql = `
     SELECT
@@ -87,6 +113,12 @@ async function findEspecialistas() {
   const { rows } = await query(sql);
   return rows;
 }
+
+/*
+|--------------------------------------------------------------------------
+| EXPORTAR
+|--------------------------------------------------------------------------
+*/
 
 module.exports = {
   findById,

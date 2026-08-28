@@ -1,6 +1,8 @@
 /**
  * routes/disponibilidad.routes.js
+ * ---------------------------------------------------------
  * Endpoints de disponibilidad de especialistas.
+ * ---------------------------------------------------------
  */
 
 const { Router } = require('express');
@@ -16,13 +18,42 @@ const {
 
 const router = Router();
 
-// Listar disponibilidad
-router.get('/', validate(listarDisponibilidadQuerySchema, 'query'), controller.listar);
+/*
+|--------------------------------------------------------------------------
+| LISTAR DISPONIBILIDAD
+|--------------------------------------------------------------------------
+| GET /api/disponibilidad
+|--------------------------------------------------------------------------
+*/
 
-// Obtener por ID
-router.get('/:id', validate(idParamSchema, 'params'), controller.obtener);
+router.get(
+  '/',
+  validate(listarDisponibilidadQuerySchema, 'query'),
+  controller.listar
+);
 
-// Crear (solo recepcionistas y admin)
+/*
+|--------------------------------------------------------------------------
+| OBTENER POR ID
+|--------------------------------------------------------------------------
+| GET /api/disponibilidad/:id
+|--------------------------------------------------------------------------
+*/
+
+router.get(
+  '/:id',
+  validate(idParamSchema, 'params'),
+  controller.obtener
+);
+
+/*
+|--------------------------------------------------------------------------
+| CREAR DISPONIBILIDAD  ← ESTE ES EL ENDPOINT QUE FALTA
+|--------------------------------------------------------------------------
+| POST /api/disponibilidad
+|--------------------------------------------------------------------------
+*/
+
 router.post(
   '/',
   requireRole('recepcionista', 'admin'),
@@ -30,7 +61,14 @@ router.post(
   controller.crear
 );
 
-// Editar (solo recepcionistas y admin)
+/*
+|--------------------------------------------------------------------------
+| ACTUALIZAR DISPONIBILIDAD
+|--------------------------------------------------------------------------
+| PUT /api/disponibilidad/:id
+|--------------------------------------------------------------------------
+*/
+
 router.put(
   '/:id',
   requireRole('recepcionista', 'admin'),
@@ -39,7 +77,14 @@ router.put(
   controller.actualizar
 );
 
-// Eliminar (solo recepcionistas y admin)
+/*
+|--------------------------------------------------------------------------
+| ELIMINAR DISPONIBILIDAD
+|--------------------------------------------------------------------------
+| DELETE /api/disponibilidad/:id
+|--------------------------------------------------------------------------
+*/
+
 router.delete(
   '/:id',
   requireRole('recepcionista', 'admin'),
