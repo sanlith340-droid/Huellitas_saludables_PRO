@@ -1,3 +1,4 @@
+// app/utils/asyncHandler.js
 /**
  * utils/asyncHandler.js
  * Manejador de funciones asíncronas.

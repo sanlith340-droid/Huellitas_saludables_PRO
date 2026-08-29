@@ -1,3 +1,4 @@
+// app/middlewares/validate.js
 /**
  * middlewares/validate.js
  * Middleware de validación con Joi.

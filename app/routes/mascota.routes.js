@@ -1,6 +1,7 @@
+// app/routes/mascota.routes.js
 /**
  * routes/mascota.routes.js
- * Endpoints para consultar mascotas y sus propietarios.
+ * Endpoints de mascotas.
  */
 
 const { Router } = require('express');

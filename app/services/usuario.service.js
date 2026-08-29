@@ -1,18 +1,11 @@
+// app/services/usuario.service.js
 /**
  * services/usuario.service.js
- * ---------------------------------------------------------
  * Lógica de negocio de usuarios.
- * ---------------------------------------------------------
  */
 
 const usuarioModel = require('../models/usuario.model');
 const AppError = require('../utils/AppError');
-
-/*
-|--------------------------------------------------------------------------
-| BUSCAR USUARIO POR DOCUMENTO
-|--------------------------------------------------------------------------
-*/
 
 async function obtenerPorDocumento(documento) {
   const usuario = await usuarioModel.findByDocumento(documento);
@@ -21,12 +14,6 @@ async function obtenerPorDocumento(documento) {
   }
   return usuario;
 }
-
-/*
-|--------------------------------------------------------------------------
-| LISTAR ESPECIALISTAS
-|--------------------------------------------------------------------------
-*/
 
 async function listarEspecialistas() {
   return usuarioModel.findEspecialistas();

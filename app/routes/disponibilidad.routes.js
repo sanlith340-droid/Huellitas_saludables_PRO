@@ -1,8 +1,7 @@
+// app/routes/disponibilidad.routes.js
 /**
  * routes/disponibilidad.routes.js
- * ---------------------------------------------------------
- * Endpoints de disponibilidad de especialistas.
- * ---------------------------------------------------------
+ * Endpoints de disponibilidad.
  */
 
 const { Router } = require('express');
@@ -18,41 +17,8 @@ const {
 
 const router = Router();
 
-/*
-|--------------------------------------------------------------------------
-| LISTAR DISPONIBILIDAD
-|--------------------------------------------------------------------------
-| GET /api/disponibilidad
-|--------------------------------------------------------------------------
-*/
-
-router.get(
-  '/',
-  validate(listarDisponibilidadQuerySchema, 'query'),
-  controller.listar
-);
-
-/*
-|--------------------------------------------------------------------------
-| OBTENER POR ID
-|--------------------------------------------------------------------------
-| GET /api/disponibilidad/:id
-|--------------------------------------------------------------------------
-*/
-
-router.get(
-  '/:id',
-  validate(idParamSchema, 'params'),
-  controller.obtener
-);
-
-/*
-|--------------------------------------------------------------------------
-| CREAR DISPONIBILIDAD  ← ESTE ES EL ENDPOINT QUE FALTA
-|--------------------------------------------------------------------------
-| POST /api/disponibilidad
-|--------------------------------------------------------------------------
-*/
+router.get('/', validate(listarDisponibilidadQuerySchema, 'query'), controller.listar);
+router.get('/:id', validate(idParamSchema, 'params'), controller.obtener);
 
 router.post(
   '/',
@@ -61,14 +27,6 @@ router.post(
   controller.crear
 );
 
-/*
-|--------------------------------------------------------------------------
-| ACTUALIZAR DISPONIBILIDAD
-|--------------------------------------------------------------------------
-| PUT /api/disponibilidad/:id
-|--------------------------------------------------------------------------
-*/
-
 router.put(
   '/:id',
   requireRole('recepcionista', 'admin'),
@@ -76,14 +34,6 @@ router.put(
   validate(actualizarDisponibilidadSchema, 'body'),
   controller.actualizar
 );
-
-/*
-|--------------------------------------------------------------------------
-| ELIMINAR DISPONIBILIDAD
-|--------------------------------------------------------------------------
-| DELETE /api/disponibilidad/:id
-|--------------------------------------------------------------------------
-*/
 
 router.delete(
   '/:id',

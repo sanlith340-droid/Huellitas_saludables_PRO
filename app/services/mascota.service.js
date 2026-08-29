@@ -1,3 +1,4 @@
+// app/services/mascota.service.js
 /**
  * services/mascota.service.js
  * Lógica de negocio de mascotas.

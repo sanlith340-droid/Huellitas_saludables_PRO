@@ -1,3 +1,4 @@
+// app/middlewares/auditLog.js
 /**
  * middlewares/auditLog.js
  * Registro de auditoría para acciones administrativas.

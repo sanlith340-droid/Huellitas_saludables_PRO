@@ -1,3 +1,4 @@
+// app/utils/AppError.js
 /**
  * utils/AppError.js
  * Errores personalizados de la aplicación.

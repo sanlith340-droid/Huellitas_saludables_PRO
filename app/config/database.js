@@ -1,3 +1,4 @@
+// app/config/database.js
 /**
  * config/database.js
  * Configuración del pool de conexiones a PostgreSQL.

@@ -1,3 +1,4 @@
+// app/utils/response.js
 /**
  * utils/response.js
  * Respuestas estandarizadas.

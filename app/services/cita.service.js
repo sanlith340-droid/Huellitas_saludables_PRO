@@ -1,3 +1,4 @@
+// app/services/cita.service.js
 /**
  * services/cita.service.js
  * Lógica de negocio de citas.
@@ -30,13 +31,11 @@ async function listarPorEspecialista(id_especialista) {
 }
 
 async function crear({ id_mascota, id_disponibilidad, motivo, solicitante }) {
-  // Validar mascota
   const mascota = await mascotaModel.findById(id_mascota);
   if (!mascota) {
     throw AppError.notFound(`No existe la mascota con id ${id_mascota}`);
   }
 
-  // Usuario normal: solo puede crear cita para su mascota
   if (solicitante.rol === 'usuario') {
     const pertenece = await mascotaModel.perteneceAUsuario(id_mascota, solicitante.id);
     if (!pertenece) {
@@ -44,7 +43,6 @@ async function crear({ id_mascota, id_disponibilidad, motivo, solicitante }) {
     }
   }
 
-  // Validar disponibilidad
   const disponibilidad = await disponibilidadModel.findById(id_disponibilidad);
   if (!disponibilidad) {
     throw AppError.notFound(`No existe disponibilidad con id ${id_disponibilidad}`);
@@ -53,7 +51,6 @@ async function crear({ id_mascota, id_disponibilidad, motivo, solicitante }) {
     throw AppError.conflict('La disponibilidad seleccionada no está disponible');
   }
 
-  // Determinar recepcionista
   let id_recepcionista;
   if (solicitante.rol === 'recepcionista') {
     id_recepcionista = solicitante.id;
@@ -65,7 +62,6 @@ async function crear({ id_mascota, id_disponibilidad, motivo, solicitante }) {
     throw AppError.badRequest('No existe un recepcionista registrado para crear la cita');
   }
 
-  // Crear cita
   try {
     return await citaModel.crearConTransaccion({
       id_mascota,
@@ -80,9 +76,6 @@ async function crear({ id_mascota, id_disponibilidad, motivo, solicitante }) {
     if (error.code === 'DISPONIBILIDAD_NO_LIBRE') {
       throw AppError.conflict('La disponibilidad ya está ocupada');
     }
-    if (error.code === '23505') {
-      throw AppError.conflict('La disponibilidad seleccionada ya tiene una cita');
-    }
     throw error;
   }
 }
@@ -90,7 +83,6 @@ async function crear({ id_mascota, id_disponibilidad, motivo, solicitante }) {
 async function editar(id_cita, cambios, solicitante) {
   const cita = await obtenerPorId(id_cita);
 
-  // Verificar nueva disponibilidad
   if (cambios.id_disponibilidad && cambios.id_disponibilidad !== cita.id_disponibilidad) {
     const nuevaDisponibilidad = await disponibilidadModel.findById(cambios.id_disponibilidad);
     if (!nuevaDisponibilidad) {

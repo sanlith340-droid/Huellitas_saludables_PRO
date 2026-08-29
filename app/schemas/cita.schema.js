@@ -1,3 +1,4 @@
+// app/schemas/cita.schema.js
 /**
  * schemas/cita.schema.js
  * Validaciones de citas con Joi.

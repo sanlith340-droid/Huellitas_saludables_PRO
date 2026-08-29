@@ -1,3 +1,4 @@
+// app/app.js
 /**
  * app.js
  * Configuración principal de Express.
@@ -40,7 +41,7 @@ app.get('/health', async (_req, res) => {
   }
 });
 
-// 4. API (rutas protegidas)
+// 4. API (rutas)
 app.use('/api', identifyUser, auditLog, apiRoutes);
 
 // 5. Manejo de errores (siempre al final)

@@ -1,21 +1,13 @@
+// app/schemas/disponibilidad.schema.js
 /**
  * schemas/disponibilidad.schema.js
- * ---------------------------------------------------------
  * Validaciones de disponibilidad con Joi.
- * Compatible con database/data_jesus.
- * ---------------------------------------------------------
  */
 
 const Joi = require('joi');
 
 const ESTADOS_DISPONIBILIDAD = ['disponible', 'ocupado'];
 const horaRegex = /^([01]\d|2[0-3]):([0-5]\d)(:[0-5]\d)?$/;
-
-/*
-|--------------------------------------------------------------------------
-| CREAR DISPONIBILIDAD
-|--------------------------------------------------------------------------
-*/
 
 const crearDisponibilidadSchema = Joi.object({
   id_usuario: Joi.string().max(10).required(),
@@ -24,12 +16,6 @@ const crearDisponibilidadSchema = Joi.object({
   estado: Joi.string().valid(...ESTADOS_DISPONIBILIDAD).default('disponible')
 });
 
-/*
-|--------------------------------------------------------------------------
-| ACTUALIZAR DISPONIBILIDAD
-|--------------------------------------------------------------------------
-*/
-
 const actualizarDisponibilidadSchema = Joi.object({
   id_usuario: Joi.string().max(10),
   fecha: Joi.date().iso(),
@@ -37,21 +23,9 @@ const actualizarDisponibilidadSchema = Joi.object({
   estado: Joi.string().valid(...ESTADOS_DISPONIBILIDAD)
 }).min(1);
 
-/*
-|--------------------------------------------------------------------------
-| ID PARAM
-|--------------------------------------------------------------------------
-*/
-
 const idParamSchema = Joi.object({
   id: Joi.number().integer().positive().required()
 });
-
-/*
-|--------------------------------------------------------------------------
-| LISTAR DISPONIBILIDAD - QUERY FILTERS
-|--------------------------------------------------------------------------
-*/
 
 const listarDisponibilidadQuerySchema = Joi.object({
   id_usuario: Joi.string().max(10),

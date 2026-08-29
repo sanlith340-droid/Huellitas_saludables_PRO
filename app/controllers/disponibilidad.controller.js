@@ -1,8 +1,7 @@
+// app/controllers/disponibilidad.controller.js
 /**
  * controllers/disponibilidad.controller.js
- * ---------------------------------------------------------
  * Controlador de disponibilidad.
- * ---------------------------------------------------------
  */
 
 const disponibilidadService = require('../services/disponibilidad.service');
@@ -10,33 +9,15 @@ const asyncHandler = require('../utils/asyncHandler');
 const { ok, created } = require('../utils/response');
 const AppError = require('../utils/AppError');
 
-/*
-|--------------------------------------------------------------------------
-| LISTAR DISPONIBILIDADES
-|--------------------------------------------------------------------------
-*/
-
 const listar = asyncHandler(async (req, res) => {
   const datos = await disponibilidadService.listar(req.query);
   return ok(res, datos, 'Disponibilidades listadas correctamente');
 });
 
-/*
-|--------------------------------------------------------------------------
-| OBTENER DISPONIBILIDAD POR ID
-|--------------------------------------------------------------------------
-*/
-
 const obtener = asyncHandler(async (req, res) => {
   const dato = await disponibilidadService.obtenerPorId(req.params.id);
   return ok(res, dato, 'Disponibilidad encontrada correctamente');
 });
-
-/*
-|--------------------------------------------------------------------------
-| CREAR DISPONIBILIDAD  ← ESTE ES EL MÉTODO QUE FALTA
-|--------------------------------------------------------------------------
-*/
 
 const crear = asyncHandler(async (req, res) => {
   if (!req.user) {
@@ -51,12 +32,6 @@ const crear = asyncHandler(async (req, res) => {
   return created(res, dato, 'Disponibilidad creada correctamente');
 });
 
-/*
-|--------------------------------------------------------------------------
-| ACTUALIZAR DISPONIBILIDAD
-|--------------------------------------------------------------------------
-*/
-
 const actualizar = asyncHandler(async (req, res) => {
   if (!req.user) {
     throw AppError.unauthorized('Usuario no autenticado');
@@ -69,12 +44,6 @@ const actualizar = asyncHandler(async (req, res) => {
   const dato = await disponibilidadService.actualizar(req.params.id, req.body);
   return ok(res, dato, 'Disponibilidad actualizada correctamente');
 });
-
-/*
-|--------------------------------------------------------------------------
-| ELIMINAR DISPONIBILIDAD
-|--------------------------------------------------------------------------
-*/
 
 const eliminar = asyncHandler(async (req, res) => {
   if (!req.user) {
