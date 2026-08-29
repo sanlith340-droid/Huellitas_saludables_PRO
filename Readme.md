@@ -162,3 +162,31 @@ npm run dev
 # Modo producción
 npm start
 
+```
+
+##  ramas navegacion 
+////// 
+
+git branch -r : ver ramas remotas git
+
+git fetch --all : actuliza el remoto
+
+git branch commonjs origin/commonjs
+
+git add .
+
+git commit -m "lista"
+
+///
+
+git checkout main
+
+git branch
+
+git checkout "commit"
+
+git checkout -b "" // crear rama
+
+git branch : ver ramas
+
+//
