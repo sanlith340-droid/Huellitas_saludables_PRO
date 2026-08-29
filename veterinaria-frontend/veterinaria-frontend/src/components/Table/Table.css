@@ -1,0 +1,189 @@
+.table-container {
+    background: white;
+    border-radius: 8px;
+    overflow-x: auto;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+th,
+td {
+    padding: 14px 16px;
+    text-align: left;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+th {
+    background: #f8fafc;
+    font-weight: 600;
+}
+
+tbody tr:hover {
+    background: #f8fafc;
+}
+
+.empty-table {
+    padding: 40px;
+    text-align: center;
+    background: white;
+}
+
+/* =====================================================
+   TOOLBAR
+===================================================== */
+
+.table-toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    padding: 18px;
+
+    border-bottom: 1px solid #e2e8f0;
+
+    gap: 20px;
+}
+
+
+/* =====================================================
+   BUSCADOR
+===================================================== */
+
+.table-search {
+    display: flex;
+    align-items: center;
+
+    width: 320px;
+
+    padding: 9px 12px;
+
+    background: #f8fafc;
+
+    border: 1px solid #e2e8f0;
+
+    border-radius: 10px;
+
+    color: #64748b;
+}
+
+
+.table-search:focus-within {
+    border-color: #2563eb;
+
+    box-shadow:
+        0 0 0 3px
+        rgba(37, 99, 235, 0.1);
+}
+
+
+.table-search input {
+    width: 100%;
+
+    border: none;
+
+    outline: none;
+
+    background: transparent;
+
+    margin-left: 9px;
+
+    font-size: 14px;
+
+    color: #334155;
+}
+
+
+.table-search input::placeholder {
+    color: #94a3b8;
+}
+
+
+/* =====================================================
+   LIMPIAR BUSCADOR
+===================================================== */
+
+.search-clear {
+    border: none;
+
+    background: transparent;
+
+    font-size: 20px;
+
+    color: #94a3b8;
+
+    cursor: pointer;
+}
+
+
+/* =====================================================
+   RESULTADOS
+===================================================== */
+
+.table-results {
+    font-size: 13px;
+
+    color: #64748b;
+}
+
+
+/* =====================================================
+   BOTÓN ACCIÓN
+===================================================== */
+
+.table-action {
+    display: inline-flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    gap: 6px;
+
+    padding: 7px 11px;
+
+    border: 1px solid #dbeafe;
+
+    border-radius: 8px;
+
+    background: #eff6ff;
+
+    color: #2563eb;
+
+    font-size: 13px;
+
+    font-weight: 600;
+
+    cursor: pointer;
+
+    transition: all 0.2s ease;
+}
+
+
+.table-action:hover {
+    background: #dbeafe;
+
+    transform: translateY(-1px);
+}
+
+
+/* =====================================================
+   RESPONSIVE
+===================================================== */
+
+@media (max-width: 768px) {
+
+    .table-toolbar {
+        flex-direction: column;
+
+        align-items: stretch;
+    }
+
+    .table-search {
+        width: auto;
+    }
+
+}
