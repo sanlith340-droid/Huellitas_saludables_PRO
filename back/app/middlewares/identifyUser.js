@@ -1,13 +1,27 @@
+// app/middlewares/identifyUser.js
 /**
  * middlewares/identifyUser.js
- * ---------------------------------------------------------
  * Autenticación mediante headers (x-user-id, x-user-role).
- * ---------------------------------------------------------
  */
 
 const { query } = require('../config/database');
 
+// Rutas públicas que no requieren autenticación
+const PUBLIC_ROUTES = [
+  '/api/auth/login',
+  '/api/auth/registro',
+  '/health'
+];
+
+function isPublicRoute(req) {
+  return PUBLIC_ROUTES.some(route => req.originalUrl.startsWith(route));
+}
+
 const identifyUser = async (req, res, next) => {
+  if (isPublicRoute(req)) {
+    return next();
+  }
+
   try {
     const userId = req.get('x-user-id');
     const userRole = req.get('x-user-role');
@@ -70,6 +84,10 @@ const identifyUser = async (req, res, next) => {
 
 const requireRole = (...rolesPermitidos) => {
   return (req, res, next) => {
+    if (isPublicRoute(req)) {
+      return next();
+    }
+
     if (!req.user) {
       return res.status(401).json({
         success: false,

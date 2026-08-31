@@ -1,3 +1,4 @@
+// app/models/cita.model.js
 /**
  * models/cita.model.js
  * Consultas SQL para la tabla cita.
@@ -81,7 +82,6 @@ async function crearConTransaccion({ id_mascota, id_disponibilidad, id_recepcion
   try {
     await client.query('BEGIN');
 
-    // Bloquear disponibilidad
     const { rows: disponibilidadRows } = await client.query(
       `SELECT id_disponibilidad, estado FROM disponibilidad WHERE id_disponibilidad = $1 FOR UPDATE`,
       [id_disponibilidad]
@@ -99,7 +99,6 @@ async function crearConTransaccion({ id_mascota, id_disponibilidad, id_recepcion
       throw error;
     }
 
-    // Insertar cita
     const { rows } = await client.query(
       `INSERT INTO cita (id_recepcionista, id_mascota, id_disponibilidad, motivo, estado)
        VALUES ($1, $2, $3, $4, 'pendiente')
@@ -137,7 +136,6 @@ async function cancelarConTransaccion(id_cita) {
     }
 
     await client.query(`UPDATE cita SET estado = 'cancelado' WHERE id_cita = $1`, [id_cita]);
-
     await client.query(
       `UPDATE disponibilidad SET estado = 'disponible' WHERE id_disponibilidad = $1`,
       [cita.id_disponibilidad]
@@ -158,7 +156,6 @@ async function editarConTransaccion(id_cita, cambios) {
   try {
     await client.query('BEGIN');
 
-    // Obtener cita actual
     const { rows: citaRows } = await client.query(
       `SELECT id_cita, id_mascota, id_disponibilidad, estado FROM cita WHERE id_cita = $1 FOR UPDATE`,
       [id_cita]
@@ -171,9 +168,7 @@ async function editarConTransaccion(id_cita, cambios) {
       throw error;
     }
 
-    // Si cambia disponibilidad
     if (cambios.id_disponibilidad && cambios.id_disponibilidad !== cita.id_disponibilidad) {
-      // Verificar nueva disponibilidad
       const { rows: nuevaRows } = await client.query(
         `SELECT id_disponibilidad, estado FROM disponibilidad WHERE id_disponibilidad = $1 FOR UPDATE`,
         [cambios.id_disponibilidad]
@@ -187,20 +182,16 @@ async function editarConTransaccion(id_cita, cambios) {
         throw new Error('NUEVA_DISPONIBILIDAD_NO_LIBRE');
       }
 
-      // Liberar anterior
       await client.query(
         `UPDATE disponibilidad SET estado = 'disponible' WHERE id_disponibilidad = $1`,
         [cita.id_disponibilidad]
       );
-
-      // Ocupar nueva
       await client.query(
         `UPDATE disponibilidad SET estado = 'ocupado' WHERE id_disponibilidad = $1`,
         [cambios.id_disponibilidad]
       );
     }
 
-    // Actualizar campos
     const campos = [];
     const valores = [];
 

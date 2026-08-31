@@ -2,11 +2,17 @@
   "name": "huellitas-saludables-backend",
   "version": "1.0.0",
   "description": "Modulo de Citas + Disponibilidad - Huellitas Saludables (sin ORM, PostgreSQL directo)",
-  "main": "app/server.js",
+  "main": "back/app/server.js",
   "scripts": {
-    "start": "node app/server.js",
-    "dev": "nodemon app/server.js"
+    "start": "node back/app/server.js",
+    "dev": "nodemon back/app/server.js",
+    "install:front": "npm install --prefix veterinaria-frontend/veterinaria-frontend",
+    "dev:front": "npm run dev --prefix veterinaria-frontend/veterinaria-frontend",
+    "install:all": "npm install && npm run install:front"
   },
+  "keywords": ["veterinaria", "citas", "express", "postgresql"],
+  "author": "Santiago Buitrago Goyeneche, Sara Jasmin Cruz, Jorge Alejandro Paez",
+  "license": "ISC",
   "dependencies": {
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",

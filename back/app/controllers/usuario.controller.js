@@ -1,3 +1,4 @@
+// app/controllers/usuario.controller.js
 /**
  * controllers/usuario.controller.js
  * Controlador de usuarios.
@@ -8,10 +9,6 @@ const asyncHandler = require('../utils/asyncHandler');
 const { ok } = require('../utils/response');
 const AppError = require('../utils/AppError');
 
-/**
- * Busca un usuario por su número de documento/ID
- * GET /api/usuarios/:documento
- */
 const obtenerPorDocumento = asyncHandler(async (req, res) => {
   const { documento } = req.params;
 
@@ -23,10 +20,6 @@ const obtenerPorDocumento = asyncHandler(async (req, res) => {
   return ok(res, usuario, 'Usuario encontrado correctamente');
 });
 
-/**
- * Lista todos los especialistas
- * GET /api/usuarios/especialistas
- */
 const listarEspecialistas = asyncHandler(async (req, res) => {
   const especialistas = await usuarioService.listarEspecialistas();
   return ok(res, especialistas, 'Especialistas listados correctamente');

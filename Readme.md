@@ -35,6 +35,22 @@ comandos de sguridad:
 
 git config --global --list
 
+---
+
+## 🛠 Tecnologías
+
+| Tecnología | Versión | Propósito |
+|------------|---------|-----------|
+| **Node.js** | v16+ | Entorno de ejecución |
+| **Express.js** | v4.18+ | Framework web |
+| **PostgreSQL** | v12+ | Base de datos relacional |
+| **pg** | v8.10+ | Driver nativo de PostgreSQL |
+| **Joi** | v17.9+ | Validación de datos |
+| **Swagger** | v6.2+ | Documentación de API |
+| **Nodemon** | v2.0+ | Recarga automática en desarrollo |
+
+---
+
 
 ## Documentacion del Front en Huellitas Saludables 
 

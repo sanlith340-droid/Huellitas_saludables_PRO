@@ -1,3 +1,4 @@
+// app/middlewares/errorHandler.js
 /**
  * middlewares/errorHandler.js
  * Manejo central de errores.

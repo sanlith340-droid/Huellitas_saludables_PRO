@@ -1,3 +1,4 @@
+// app/models/mascota.model.js
 /**
  * models/mascota.model.js
  * Consultas SQL relacionadas con mascotas.
@@ -26,7 +27,6 @@ async function findAll() {
     LEFT JOIN usuario u ON u.id_usuario = um.id_usuario
     ORDER BY m.id_mascota ASC
   `;
-
   const { rows } = await query(sql);
   return rows;
 }
@@ -51,14 +51,10 @@ async function findById(id_mascota) {
     LEFT JOIN usuario_mascota um ON um.id_mascota = m.id_mascota
     LEFT JOIN usuario u ON u.id_usuario = um.id_usuario
     WHERE m.id_mascota = $1
-    ORDER BY u.id_usuario
   `;
-
   const { rows } = await query(sql, [id_mascota]);
 
-  if (rows.length === 0) {
-    return null;
-  }
+  if (rows.length === 0) return null;
 
   return {
     id_mascota: rows[0].id_mascota,
@@ -88,7 +84,6 @@ async function perteneceAUsuario(id_mascota, id_usuario) {
     FROM usuario_mascota
     WHERE id_mascota = $1 AND id_usuario = $2
   `;
-
   const { rows } = await query(sql, [id_mascota, id_usuario]);
   return rows.length > 0;
 }

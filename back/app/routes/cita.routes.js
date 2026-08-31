@@ -1,3 +1,4 @@
+// app/routes/cita.routes.js
 /**
  * routes/cita.routes.js
  * Endpoints de citas.
@@ -15,16 +16,10 @@ const {
 
 const router = Router();
 
-// Listar citas (todos los roles autenticados)
 router.get('/', validate(listarCitasQuerySchema, 'query'), controller.listar);
-
-// Obtener cita por ID
 router.get('/:id', validate(idParamSchema, 'params'), controller.obtener);
-
-// Listar citas por especialista
 router.get('/especialista/:id_especialista', controller.listarPorEspecialista);
 
-// Crear cita (usuarios, recepcionistas, admin)
 router.post(
   '/',
   requireRole('usuario', 'recepcionista', 'admin'),
@@ -32,7 +27,6 @@ router.post(
   controller.crear
 );
 
-// Editar cita
 router.put(
   '/:id',
   requireRole('usuario', 'recepcionista', 'admin'),
@@ -40,7 +34,6 @@ router.put(
   controller.editar
 );
 
-// Cancelar cita
 router.patch(
   '/:id/cancelar',
   requireRole('usuario', 'recepcionista', 'admin'),
