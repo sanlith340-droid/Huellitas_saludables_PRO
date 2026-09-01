@@ -10,15 +10,23 @@
     "dev:front": "npm run dev --prefix veterinaria-frontend/veterinaria-frontend",
     "install:all": "npm install && npm run install:front"
   },
-  "keywords": ["veterinaria", "citas", "express", "postgresql"],
+  "keywords": [
+    "veterinaria",
+    "citas",
+    "express",
+    "postgresql"
+  ],
   "author": "Santiago Buitrago Goyeneche, Sara Jasmin Cruz, Jorge Alejandro Paez",
   "license": "ISC",
   "dependencies": {
+    "axios": "^1.20.0",
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
     "express": "^4.19.2",
     "joi": "^17.13.3",
     "pg": "^8.12.0",
+    "react-icons": "^5.7.0",
+    "react-router-dom": "^7.18.3",
     "swagger-jsdoc": "^6.3.0",
     "swagger-ui-express": "^5.0.1"
   },
