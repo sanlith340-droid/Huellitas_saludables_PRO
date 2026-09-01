@@ -31,15 +31,31 @@ const registroAdminSchema = Joi.object({
   correo: Joi.string().email().max(150).required(),
   direccion: Joi.string().max(150).required(),
   contrasena: Joi.string().min(4).max(255).required(),
+  
+  // ============================================================
+  // ESPECIALIZACIÓN: Solo requerida para especialistas
+  // ============================================================
   especializacion: Joi.string().max(100).when('rol', {
     is: 'especialista',
-    then: Joi.required()
+    then: Joi.required(),
+    otherwise: Joi.optional().allow(null)
   }),
-  tipo: Joi.string().valid(...TIPOS_USUARIO).when('rol', {
-    is: 'usuario',
-    then: Joi.required()
-  }),
-  rol: Joi.string().valid(...ROLES_ADMIN).required()
+  
+  // ============================================================
+  // TIPO: Solo requerido para usuarios, pero en registro-admin
+  // el rol NO puede ser usuario, así que siempre es opcional
+  // ============================================================
+  tipo: Joi.string()
+    .valid(...TIPOS_USUARIO)
+    .optional()
+    .allow(null),
+  
+  // ============================================================
+  // ROL: Obligatorio y debe ser uno de los roles permitidos
+  // ============================================================
+  rol: Joi.string()
+    .valid(...ROLES_ADMIN)
+    .required()
 });
 
 module.exports = {

@@ -80,28 +80,39 @@ async function registroAdmin(datosUsuario, adminId) {
     direccion,
     contrasena,
     especializacion,
-    tipo,
+    tipo,        // ← Este campo se ignora para admin/especialista/recepcionista
     rol
   } = datosUsuario;
 
+  // 1. Validar que el administrador tenga permisos
   const admin = await authModel.findById(adminId);
   if (!admin || admin.rol !== 'admin') {
     throw AppError.forbidden('Solo los administradores pueden crear cuentas de otros roles');
   }
 
+  // 2. Validar que el rol sea permitido para creación por admin
   const rolesPermitidos = ['admin', 'especialista', 'recepcionista'];
   if (!rolesPermitidos.includes(rol)) {
     throw AppError.badRequest(`El rol "${rol}" no puede ser creado por un administrador`);
   }
 
+  // 3. Validar que el correo no esté registrado
   const emailExists = await authModel.existsByEmail(correo);
   if (emailExists) {
     throw AppError.conflict('El correo electrónico ya está registrado');
   }
 
+  // 4. Generar ID automático
   const id_usuario = await authModel.generarIdUsuario(rol);
+
+  // 5. En producción: Hashear contraseña
   const hashedPassword = contrasena;
 
+  // 6. Crear usuario
+  // ============================================================
+  // IMPORTANTE: El campo 'tipo' solo aplica para usuarios normales
+  // Para admin, especialista y recepcionista, tipo debe ser NULL
+  // ============================================================
   const nuevoUsuario = await authModel.create({
     id_usuario,
     nombre,
@@ -111,10 +122,11 @@ async function registroAdmin(datosUsuario, adminId) {
     correo,
     contrasena: hashedPassword,
     especializacion: rol === 'especialista' ? especializacion : null,
-    tipo: rol === 'usuario' ? (tipo || 'principal') : null,
+    tipo: null,  // ← SIEMPRE NULL para admin, especialista, recepcionista
     rol
   });
 
+  // 7. Eliminar contraseña del objeto de respuesta
   const { contrasena: _, ...usuarioSinPassword } = nuevoUsuario;
 
   return {
