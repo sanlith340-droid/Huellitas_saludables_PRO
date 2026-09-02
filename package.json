@@ -8,7 +8,10 @@
     "dev": "nodemon back/app/server.js",
     "install:front": "npm install --prefix veterinaria-frontend/veterinaria-frontend",
     "dev:front": "npm run dev --prefix veterinaria-frontend/veterinaria-frontend",
-    "install:all": "npm install && npm run install:front"
+    "install:all": "npm install && npm run install:front",
+    "build": "vite build",
+    "preview": "vite preview",
+    "lint": "eslint ."
   },
   "keywords": [
     "veterinaria",
@@ -28,9 +31,13 @@
     "react-icons": "^5.7.0",
     "react-router-dom": "^7.18.3",
     "swagger-jsdoc": "^6.3.0",
-    "swagger-ui-express": "^5.0.1"
+    "swagger-ui-express": "^5.0.1",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
   },
   "devDependencies": {
-    "nodemon": "^3.1.4"
+    "nodemon": "^3.1.4",
+    "@vitejs/plugin-react": "^4.3.4",
+    "vite": "^5.4.11"
   }
 }
