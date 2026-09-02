@@ -23,7 +23,13 @@ const app = express();
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 // 2. Middlewares globales
-app.use(cors({ origin: process.env.CORS_ORIGIN || '*' }));
+app.use(cors({
+  origin: '*',
+  allowedHeaders: ['Content-Type', 'x-user-id', 'x-user-role', 'Authorization'],
+  exposedHeaders: ['x-user-id', 'x-user-role'],
+  credentials: true
+}));
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
@@ -41,7 +47,7 @@ app.get('/health', async (_req, res) => {
   }
 });
 
-// 4. API (rutas)
+// 4. API (rutas) - identifyUser ANTES de apiRoutes
 app.use('/api', identifyUser, auditLog, apiRoutes);
 
 // 5. Manejo de errores (siempre al final)

@@ -58,3 +58,8 @@ git config --global --list
 
 Conectar con Postgres
 
+ cd ..
+cd front
+
+npm install
+npm run dev

@@ -11,6 +11,7 @@ const mascotaRoutes = require('./mascota.routes');
 const usuarioRoutes = require('./usuario.routes');
 const citaRoutes = require('./cita.routes');
 const disponibilidadRoutes = require('./disponibilidad.routes');
+const historiaRoutes = require('./historia.routes');  // ← NUEVO
 
 const router = Router();
 
@@ -22,5 +23,6 @@ router.use('/mascotas', mascotaRoutes);
 router.use('/usuarios', usuarioRoutes);
 router.use('/citas', citaRoutes);
 router.use('/disponibilidad', disponibilidadRoutes);
+router.use('/historia', historiaRoutes);  // ← NUEVO
 
 module.exports = router;

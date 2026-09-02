@@ -6,6 +6,9 @@
 
 const { query } = require('../config/database');
 
+/**
+ * Busca un usuario por su correo electrónico
+ */
 async function findByEmail(correo) {
   const sql = `
     SELECT
@@ -27,6 +30,9 @@ async function findByEmail(correo) {
   return rows[0] || null;
 }
 
+/**
+ * Busca un usuario por su ID
+ */
 async function findById(id_usuario) {
   const sql = `
     SELECT
@@ -47,6 +53,9 @@ async function findById(id_usuario) {
   return rows[0] || null;
 }
 
+/**
+ * Crea un nuevo usuario
+ */
 async function create(usuarioData) {
   const {
     id_usuario,
@@ -104,12 +113,27 @@ async function create(usuarioData) {
   return rows[0] || null;
 }
 
+/**
+ * Verifica si un ID de usuario ya existe
+ */
+async function existsById(id_usuario) {
+  const sql = `SELECT 1 FROM usuario WHERE id_usuario = $1`;
+  const { rows } = await query(sql, [id_usuario]);
+  return rows.length > 0;
+}
+
+/**
+ * Verifica si un correo ya está registrado
+ */
 async function existsByEmail(correo) {
   const sql = `SELECT 1 FROM usuario WHERE correo = $1`;
   const { rows } = await query(sql, [correo]);
   return rows.length > 0;
 }
 
+/**
+ * Genera el siguiente ID de usuario basado en el rol
+ */
 async function generarIdUsuario(rol) {
   const prefixMap = {
     'usuario': 'USU',
@@ -139,10 +163,81 @@ async function generarIdUsuario(rol) {
   return `${prefix}${String(num).padStart(3, '0')}`;
 }
 
+/**
+ * Actualiza el tipo de usuario (principal/acudiente)
+ */
+async function updateTipo(id_usuario, tipo) {
+  const sql = `
+    UPDATE usuario 
+    SET tipo = $1
+    WHERE id_usuario = $2
+    RETURNING
+      id_usuario,
+      nombre,
+      apellidos,
+      telefono,
+      correo,
+      direccion,
+      especializacion,
+      tipo,
+      rol,
+      fecha_registro
+  `;
+  const { rows } = await query(sql, [tipo, id_usuario]);
+  return rows[0] || null;
+}
+
+/**
+ * Actualiza la especialización de un especialista
+ */
+async function updateEspecializacion(id_usuario, especializacion) {
+  const sql = `
+    UPDATE usuario 
+    SET especializacion = $1
+    WHERE id_usuario = $2
+    RETURNING
+      id_usuario,
+      nombre,
+      apellidos,
+      telefono,
+      correo,
+      direccion,
+      especializacion,
+      tipo,
+      rol,
+      fecha_registro
+  `;
+  const { rows } = await query(sql, [especializacion, id_usuario]);
+  return rows[0] || null;
+}
+
+/**
+ * Cambia la contraseña de un usuario
+ */
+async function updatePassword(id_usuario, nuevaContrasena) {
+  const sql = `
+    UPDATE usuario 
+    SET contrasena = $1
+    WHERE id_usuario = $2
+    RETURNING id_usuario
+  `;
+  const { rows } = await query(sql, [nuevaContrasena, id_usuario]);
+  return rows[0] || null;
+}
+
+/**
+ * ============================================================
+ * EXPORTAR TODAS LAS FUNCIONES
+ * ============================================================
+ */
 module.exports = {
   findByEmail,
   findById,
   create,
+  existsById,
   existsByEmail,
-  generarIdUsuario
+  generarIdUsuario,
+  updateTipo,
+  updateEspecializacion,
+  updatePassword
 };
