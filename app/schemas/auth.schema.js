@@ -6,6 +6,11 @@
 
 const Joi = require('joi');
 
+// ============================================================
+// ROLES PERMITIDOS PARA REGISTRO-ADMIN
+// SOLO admin, especialista y recepcionista
+// usuario NO está permitido aquí (tiene registro público)
+// ============================================================
 const ROLES_ADMIN = ['admin', 'especialista', 'recepcionista'];
 const TIPOS_USUARIO = ['principal', 'acudiente'];
 
@@ -24,7 +29,14 @@ const registroSchema = Joi.object({
   tipo: Joi.string().valid(...TIPOS_USUARIO).default('principal')
 });
 
+// ============================================================
+// SCHEMA DINÁMICO PARA REGISTRO-ADMIN
+// Cambia según el rol seleccionado
+// ============================================================
 const registroAdminSchema = Joi.object({
+  // ============================================================
+  // CAMPOS OBLIGATORIOS SIEMPRE
+  // ============================================================
   nombre: Joi.string().max(100).required(),
   apellidos: Joi.string().max(150).required(),
   telefono: Joi.string().max(20).required(),
@@ -33,29 +45,42 @@ const registroAdminSchema = Joi.object({
   contrasena: Joi.string().min(4).max(255).required(),
   
   // ============================================================
-  // ESPECIALIZACIÓN: Solo requerida para especialistas
-  // ============================================================
-  especializacion: Joi.string().max(100).when('rol', {
-    is: 'especialista',
-    then: Joi.required(),
-    otherwise: Joi.optional().allow(null)
-  }),
-  
-  // ============================================================
-  // TIPO: Solo requerido para usuarios, pero en registro-admin
-  // el rol NO puede ser usuario, así que siempre es opcional
-  // ============================================================
-  tipo: Joi.string()
-    .valid(...TIPOS_USUARIO)
-    .optional()
-    .allow(null),
-  
-  // ============================================================
-  // ROL: Obligatorio y debe ser uno de los roles permitidos
+  // ROL: Obligatorio - SOLO admin, especialista, recepcionista
   // ============================================================
   rol: Joi.string()
     .valid(...ROLES_ADMIN)
     .required()
+    .messages({
+      'any.only': 'El rol debe ser: admin, especialista o recepcionista',
+      'any.required': 'El rol es requerido'
+    }),
+  
+  // ============================================================
+  // ESPECIALIZACIÓN: 
+  // - OBLIGATORIA cuando rol = 'especialista'
+  // - NO PERMITIDA (null) cuando rol = 'admin' o 'recepcionista'
+  // ============================================================
+  especializacion: Joi.when('rol', {
+    is: 'especialista',
+    then: Joi.string().max(100).required()
+      .messages({
+        'any.required': 'La especialización es requerida para especialistas'
+      }),
+    otherwise: Joi.valid(null).optional()
+      .messages({
+        'any.only': 'La especialización solo es permitida para especialistas'
+      })
+  }),
+  
+  // ============================================================
+  // TIPO: 
+  // - NO PERMITIDO para admin, especialista, recepcionista
+  // - Siempre debe ser null
+  // ============================================================
+  tipo: Joi.valid(null).optional()
+    .messages({
+      'any.only': 'El tipo solo es permitido para usuarios (use /api/auth/registro)'
+    })
 });
 
 module.exports = {

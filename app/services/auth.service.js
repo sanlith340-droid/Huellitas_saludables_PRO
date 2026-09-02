@@ -8,18 +8,26 @@ const authModel = require('../models/auth.model');
 const AppError = require('../utils/AppError');
 
 async function login({ correo, contrasena }) {
+  console.log('[auth.service] Login para:', correo);
+
   const usuario = await authModel.findByEmail(correo);
   
   if (!usuario) {
+    console.log('[auth.service] ❌ Usuario no encontrado');
     throw AppError.unauthorized('Credenciales inválidas. Verifica tu correo y contraseña.');
   }
+
+  console.log('[auth.service] ✅ Usuario encontrado:', usuario.id_usuario);
 
   // NOTA: En producción usar bcrypt.compare()
   const passwordMatch = contrasena === usuario.contrasena;
   
   if (!passwordMatch) {
+    console.log('[auth.service] ❌ Contraseña incorrecta');
     throw AppError.unauthorized('Credenciales inválidas. Verifica tu correo y contraseña.');
   }
+
+  console.log('[auth.service] ✅ Contraseña correcta');
 
   const { contrasena: _, ...usuarioSinPassword } = usuario;
 
@@ -39,6 +47,8 @@ async function registro(datosUsuario) {
     contrasena,
     tipo
   } = datosUsuario;
+
+  console.log('[auth.service] Registro usuario:', correo);
 
   const emailExists = await authModel.existsByEmail(correo);
   if (emailExists) {
@@ -63,6 +73,8 @@ async function registro(datosUsuario) {
     rol: 'usuario'
   });
 
+  console.log('[auth.service] ✅ Usuario creado:', id_usuario);
+
   const { contrasena: _, ...usuarioSinPassword } = nuevoUsuario;
 
   return {
@@ -80,39 +92,47 @@ async function registroAdmin(datosUsuario, adminId) {
     direccion,
     contrasena,
     especializacion,
-    tipo,        // ← Este campo se ignora para admin/especialista/recepcionista
     rol
   } = datosUsuario;
+
+  console.log('[auth.service] RegistroAdmin - Admin ID:', adminId);
+  console.log('[auth.service] RegistroAdmin - Datos:', { nombre, correo, rol });
 
   // 1. Validar que el administrador tenga permisos
   const admin = await authModel.findById(adminId);
   if (!admin || admin.rol !== 'admin') {
+    console.log('[auth.service] ❌ Admin no encontrado o no es admin');
     throw AppError.forbidden('Solo los administradores pueden crear cuentas de otros roles');
   }
 
-  // 2. Validar que el rol sea permitido para creación por admin
-  const rolesPermitidos = ['admin', 'especialista', 'recepcionista'];
-  if (!rolesPermitidos.includes(rol)) {
-    throw AppError.badRequest(`El rol "${rol}" no puede ser creado por un administrador`);
-  }
+  console.log('[auth.service] ✅ Admin verificado:', adminId);
 
-  // 3. Validar que el correo no esté registrado
+  // 2. Validar que el correo no esté registrado
   const emailExists = await authModel.existsByEmail(correo);
   if (emailExists) {
+    console.log('[auth.service] ❌ Email ya registrado');
     throw AppError.conflict('El correo electrónico ya está registrado');
   }
 
-  // 4. Generar ID automático
+  // 3. Generar ID automático
   const id_usuario = await authModel.generarIdUsuario(rol);
+  console.log('[auth.service] 📝 ID generado:', id_usuario);
 
-  // 5. En producción: Hashear contraseña
+  // 4. En producción: Hashear contraseña
   const hashedPassword = contrasena;
 
+  // 5. Determinar especialización y tipo SEGÚN EL ROL
+  let especializacionFinal = null;
+  let tipoFinal = null;
+
+  if (rol === 'especialista') {
+    especializacionFinal = especializacion;
+    console.log('[auth.service] 📝 Especialización:', especializacionFinal);
+  }
+
+  console.log('[auth.service] 📝 tipoFinal:', tipoFinal);
+
   // 6. Crear usuario
-  // ============================================================
-  // IMPORTANTE: El campo 'tipo' solo aplica para usuarios normales
-  // Para admin, especialista y recepcionista, tipo debe ser NULL
-  // ============================================================
   const nuevoUsuario = await authModel.create({
     id_usuario,
     nombre,
@@ -121,10 +141,12 @@ async function registroAdmin(datosUsuario, adminId) {
     direccion,
     correo,
     contrasena: hashedPassword,
-    especializacion: rol === 'especialista' ? especializacion : null,
-    tipo: null,  // ← SIEMPRE NULL para admin, especialista, recepcionista
+    especializacion: especializacionFinal,
+    tipo: tipoFinal,
     rol
   });
+
+  console.log('[auth.service] ✅ Usuario creado:', id_usuario);
 
   // 7. Eliminar contraseña del objeto de respuesta
   const { contrasena: _, ...usuarioSinPassword } = nuevoUsuario;

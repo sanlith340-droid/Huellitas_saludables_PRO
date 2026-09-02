@@ -20,7 +20,7 @@ const router = Router();
 router.post('/login', validate(loginSchema, 'body'), controller.login);
 router.post('/registro', validate(registroSchema, 'body'), controller.registro);
 
-// Solo admin
+// Solo admin - crear admin, especialista, recepcionista
 router.post(
   '/registro-admin',
   requireRole('admin'),

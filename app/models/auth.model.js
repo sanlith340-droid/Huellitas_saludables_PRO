@@ -54,21 +54,7 @@ async function findById(id_usuario) {
 }
 
 /**
- * Crea un nuevo usuario (registro)
- * 
- * @param {Object} usuarioData - Datos del usuario
- * @param {string} usuarioData.id_usuario - ID del usuario (ej: USU001)
- * @param {string} usuarioData.nombre - Nombre del usuario
- * @param {string} usuarioData.apellidos - Apellidos del usuario
- * @param {string} usuarioData.telefono - Teléfono del usuario
- * @param {string} usuarioData.correo - Correo electrónico
- * @param {string} usuarioData.direccion - Dirección
- * @param {string} usuarioData.contrasena - Contraseña (sin hash en desarrollo)
- * @param {string|null} usuarioData.especializacion - Especialización (solo para especialistas)
- * @param {string|null} usuarioData.tipo - Tipo de usuario: 'principal' o 'acudiente' (solo para rol 'usuario')
- * @param {string} usuarioData.rol - Rol del usuario: 'usuario', 'especialista', 'recepcionista', 'admin'
- * 
- * @returns {Promise<Object>} Usuario creado (sin contraseña)
+ * Crea un nuevo usuario
  */
 async function create(usuarioData) {
   const {
@@ -119,9 +105,9 @@ async function create(usuarioData) {
     correo,
     direccion,
     contrasena,
-    especializacion || null,  // Si es undefined o vacío, va NULL
-    tipo || null,             // Si es undefined o vacío, va NULL
-    rol || 'usuario'          // Por defecto 'usuario'
+    especializacion || null,
+    tipo || null,
+    rol || 'usuario'
   ]);
 
   return rows[0] || null;
@@ -147,15 +133,6 @@ async function existsByEmail(correo) {
 
 /**
  * Genera el siguiente ID de usuario basado en el rol
- * 
- * Ejemplos:
- * - usuario -> USU001, USU002, ...
- * - especialista -> ESP001, ESP002, ...
- * - recepcionista -> REC001, REC002, ...
- * - admin -> ADM001, ADM002, ...
- * 
- * @param {string} rol - Rol del usuario
- * @returns {Promise<string>} ID generado (ej: USU001)
  */
 async function generarIdUsuario(rol) {
   const prefixMap = {
@@ -248,6 +225,11 @@ async function updatePassword(id_usuario, nuevaContrasena) {
   return rows[0] || null;
 }
 
+/**
+ * ============================================================
+ * EXPORTAR TODAS LAS FUNCIONES
+ * ============================================================
+ */
 module.exports = {
   findByEmail,
   findById,
