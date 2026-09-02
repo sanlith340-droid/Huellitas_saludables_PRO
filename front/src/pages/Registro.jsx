@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import api from "../services/api";
+import huLogo from "../assets/hu.png";
 
 const ESTADO_INICIAL = {
   nombre: "",
@@ -52,7 +53,9 @@ function Registro() {
     <div className="auth">
       <div className="auth__side">
         <div>
-          <span className="brand__mark">🐾</span>
+          <span className="brand__mark">
+            <img src={huLogo} alt="Huellitas Saludables" />
+          </span>
           <h2>Crea tu cuenta en Huellitas Saludables</h2>
           <p>Registra tus datos para agendar citas y llevar el historial clínico de tus mascotas.</p>
         </div>

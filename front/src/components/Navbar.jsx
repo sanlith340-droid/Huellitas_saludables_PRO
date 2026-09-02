@@ -1,5 +1,6 @@
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import huLogo from "../assets/hu.png";
 
 function Navbar() {
   const { usuario, autenticado, logout } = useAuth();
@@ -14,7 +15,9 @@ function Navbar() {
     <header className="navbar">
       <div className="container navbar__inner">
         <Link to="/" className="brand">
-          <span className="brand__mark">🐾</span>
+          <span className="brand__mark">
+            <img src={huLogo} alt="Huellitas Saludables" />
+          </span>
           Huellitas Saludables
         </Link>
 

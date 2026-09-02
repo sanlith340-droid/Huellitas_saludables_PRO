@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import api from "../services/api";
 import { useAuth } from "../context/AuthContext";
+import huLogo from "../assets/hu.png";
 
 function Login() {
   const navigate = useNavigate();
@@ -46,7 +47,9 @@ function Login() {
     <div className="auth">
       <div className="auth__side">
         <div>
-          <span className="brand__mark">🐾</span>
+          <span className="brand__mark">
+            <img src={huLogo} alt="Huellitas Saludables" />
+          </span>
           <h2>Bienvenido de nuevo a Huellitas Saludables</h2>
           <p>Inicia sesión para ver las citas y el historial clínico de tus mascotas.</p>
         </div>

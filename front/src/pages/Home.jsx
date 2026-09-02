@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { FaCalendarCheck, FaStethoscope, FaClipboardList } from "react-icons/fa";
+import perritoImg from "../assets/perrito.png";
 
 function Home() {
   const { autenticado } = useAuth();
@@ -35,7 +36,7 @@ function Home() {
         </div>
 
         <div className="hero__panel">
-          <div className="hero__paw">🐾</div>
+          <div className="hero__paw"><img src={perritoImg} alt="Patita de mascota" /></div>
           <h3>Historia clínica al día</h3>
           <p>
             Cada consulta, vacuna y tratamiento queda registrado para que tu
