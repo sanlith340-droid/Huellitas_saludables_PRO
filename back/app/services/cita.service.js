@@ -8,6 +8,7 @@ const citaModel = require('../models/cita.model');
 const mascotaModel = require('../models/mascota.model');
 const disponibilidadModel = require('../models/disponibilidad.model');
 const usuarioModel = require('../models/usuario.model');
+const notificacionService = require('./notificacion.service');
 const AppError = require('../utils/AppError');
 
 async function listar(filtros) {
@@ -63,12 +64,19 @@ async function crear({ id_mascota, id_disponibilidad, motivo, solicitante }) {
   }
 
   try {
-    return await citaModel.crearConTransaccion({
+    const nuevaCita = await citaModel.crearConTransaccion({
       id_mascota,
       id_disponibilidad,
       id_recepcionista,
       motivo
     });
+
+    await notificacionService.notificarNuevaCita({
+      veterinarioId: nuevaCita.id_especialista,
+      cita: nuevaCita
+    });
+
+    return nuevaCita;
   } catch (error) {
     if (error.code === 'DISPONIBILIDAD_NO_EXISTE') {
       throw AppError.notFound('La disponibilidad no existe');
@@ -103,7 +111,14 @@ async function cancelar(id_cita, solicitante) {
     throw AppError.conflict('La cita ya está cancelada');
   }
 
-  return citaModel.cancelarConTransaccion(id_cita);
+  const citaCancelada = await citaModel.cancelarConTransaccion(id_cita);
+
+  await notificacionService.notificarCambioEstadoCita({
+    veterinarioId: citaCancelada.id_especialista,
+    cita: citaCancelada
+  });
+
+  return citaCancelada;
 }
 
 module.exports = {
