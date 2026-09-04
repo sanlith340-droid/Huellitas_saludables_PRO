@@ -1,9 +1,4 @@
 // app/models/cita.model.js
-/**
- * models/cita.model.js
- * Consultas SQL para la tabla cita.
- */
-
 const { query, getClient } = require('../config/database');
 
 const SELECT_BASE = `
@@ -226,6 +221,20 @@ async function editarConTransaccion(id_cita, cambios) {
   }
 }
 
+// ============================================================
+// NUEVA FUNCIÓN
+// ============================================================
+async function perteneceAUsuario(id_cita, id_usuario) {
+  const sql = `
+    SELECT 1
+    FROM cita c
+    INNER JOIN usuario_mascota um ON um.id_mascota = c.id_mascota
+    WHERE c.id_cita = $1 AND um.id_usuario = $2
+  `;
+  const { rows } = await query(sql, [id_cita, id_usuario]);
+  return rows.length > 0;
+}
+
 module.exports = {
   findAll,
   findById,
@@ -233,5 +242,6 @@ module.exports = {
   obtenerPrimerRecepcionista,
   crearConTransaccion,
   editarConTransaccion,
-  cancelarConTransaccion
+  cancelarConTransaccion,
+  perteneceAUsuario,
 };

@@ -52,9 +52,6 @@ const options = {
         },
       },
       schemas: {
-        // ============================================================
-        // USUARIO
-        // ============================================================
         Usuario: {
           type: 'object',
           properties: {
@@ -70,9 +67,36 @@ const options = {
             fecha_registro: { type: 'string', format: 'date-time' }
           }
         },
-        // ============================================================
-        // AUTH
-        // ============================================================
+        Mascota: {
+          type: 'object',
+          properties: {
+            id_mascota: { type: 'integer', example: 1 },
+            mascota: { type: 'string', example: 'Firulais' },
+            fecha_nacimiento: { type: 'string', format: 'date', example: '2023-05-15' },
+            especie: { type: 'string', example: 'perro' },
+            genero: { type: 'string', example: 'macho' },
+            raza: {
+              type: 'object',
+              properties: {
+                id_raza: { type: 'integer', example: 1 },
+                nombre: { type: 'string', example: 'Labrador' }
+              }
+            },
+            propietarios: {
+              type: 'array',
+              items: {
+                type: 'object',
+                properties: {
+                  id_usuario: { type: 'string', example: 'USU001' },
+                  nombre: { type: 'string', example: 'Juan' },
+                  apellidos: { type: 'string', example: 'Perez' },
+                  telefono: { type: 'string', example: '3001234567' },
+                  correo: { type: 'string', example: 'juan@email.com' }
+                }
+              }
+            }
+          }
+        },
         LoginRequest: {
           type: 'object',
           required: ['correo', 'contrasena'],
@@ -123,9 +147,6 @@ const options = {
             }
           }
         },
-        // ============================================================
-        // DISPONIBILIDAD
-        // ============================================================
         Disponibilidad: {
           type: 'object',
           properties: {
@@ -149,9 +170,15 @@ const options = {
             estado: { type: 'string', enum: ['disponible', 'ocupado'], default: 'disponible' },
           },
         },
-        // ============================================================
-        // CITA
-        // ============================================================
+        ActualizarDisponibilidadRequest: {
+          type: 'object',
+          properties: {
+            id_usuario: { type: 'string', example: 'ESP001' },
+            fecha: { type: 'string', format: 'date', example: '2026-08-22' },
+            hora: { type: 'string', example: '10:00:00' },
+            estado: { type: 'string', enum: ['disponible', 'ocupado'] }
+          }
+        },
         CrearCitaRequest: {
           type: 'object',
           required: ['id_mascota', 'id_disponibilidad'],
@@ -177,9 +204,6 @@ const options = {
             especialista_apellidos: { type: 'string' },
           },
         },
-        // ============================================================
-        // HISTORIA CLÍNICA
-        // ============================================================
         HistoriaClinica: {
           type: 'object',
           properties: {
@@ -221,7 +245,7 @@ const options = {
     },
     paths: {
       // ============================================================
-      // AUTH - PÚBLICOS
+      // AUTH
       // ============================================================
       '/api/auth/login': {
         post: {
@@ -432,6 +456,93 @@ const options = {
           },
         },
       },
+      '/api/disponibilidad/{id}': {
+        get: {
+          summary: 'Obtener disponibilidad por ID',
+          tags: ['Disponibilidad'],
+          security: [{ apiKey: [] }],
+          parameters: [
+            { $ref: '#/components/parameters/UserId' },
+            { $ref: '#/components/parameters/UserRole' },
+            {
+              name: 'id',
+              in: 'path',
+              required: true,
+              schema: { type: 'integer' },
+              description: 'ID de la disponibilidad'
+            }
+          ],
+          responses: {
+            200: {
+              description: 'Disponibilidad encontrada',
+              content: {
+                'application/json': {
+                  schema: {
+                    type: 'object',
+                    properties: {
+                      success: { type: 'boolean', example: true },
+                      data: { $ref: '#/components/schemas/Disponibilidad' }
+                    }
+                  }
+                }
+              }
+            },
+            404: { description: 'Disponibilidad no encontrada' }
+          }
+        },
+        put: {
+          summary: 'Actualizar disponibilidad',
+          tags: ['Disponibilidad'],
+          description: 'Solo recepcionistas y administradores',
+          security: [{ apiKey: [] }],
+          parameters: [
+            { $ref: '#/components/parameters/UserId' },
+            { $ref: '#/components/parameters/UserRole' },
+            {
+              name: 'id',
+              in: 'path',
+              required: true,
+              schema: { type: 'integer' }
+            }
+          ],
+          requestBody: {
+            required: true,
+            content: {
+              'application/json': {
+                schema: { $ref: '#/components/schemas/ActualizarDisponibilidadRequest' }
+              }
+            }
+          },
+          responses: {
+            200: { description: 'Disponibilidad actualizada correctamente' },
+            403: { description: 'No tiene permisos' },
+            404: { description: 'Disponibilidad no encontrada' },
+            409: { description: 'Conflicto - no se puede modificar una disponibilidad ocupada' }
+          }
+        },
+        delete: {
+          summary: 'Eliminar disponibilidad',
+          tags: ['Disponibilidad'],
+          description: 'Solo recepcionistas y administradores. No se puede eliminar si está ocupada.',
+          security: [{ apiKey: [] }],
+          parameters: [
+            { $ref: '#/components/parameters/UserId' },
+            { $ref: '#/components/parameters/UserRole' },
+            {
+              name: 'id',
+              in: 'path',
+              required: true,
+              schema: { type: 'integer' }
+            }
+          ],
+          responses: {
+            200: { description: 'Disponibilidad eliminada correctamente' },
+            403: { description: 'No tiene permisos' },
+            404: { description: 'Disponibilidad no encontrada' },
+            409: { description: 'No se puede eliminar una disponibilidad ocupada' }
+          }
+        }
+      },
       // ============================================================
       // CITAS
       // ============================================================
@@ -567,6 +678,7 @@ const options = {
           },
           responses: {
             200: { description: 'Cita editada correctamente' },
+            403: { description: 'No tienes permiso para modificar esta cita porque no te pertenece' },
             404: { description: 'Cita no encontrada' },
             409: { description: 'Conflicto' },
           },
@@ -590,6 +702,7 @@ const options = {
           ],
           responses: {
             200: { description: 'Cita cancelada correctamente' },
+            403: { description: 'No tienes permiso para cancelar esta cita porque no te pertenece' },
             404: { description: 'Cita no encontrada' },
             409: { description: 'Conflicto - cita ya cancelada' },
           },
@@ -713,9 +826,75 @@ const options = {
             { $ref: '#/components/parameters/UserRole' },
           ],
           responses: {
-            200: { description: 'Mascotas listadas correctamente' },
+            200: {
+              description: 'Mascotas listadas correctamente',
+              content: {
+                'application/json': {
+                  schema: {
+                    type: 'object',
+                    properties: {
+                      success: { type: 'boolean', example: true },
+                      data: {
+                        type: 'array',
+                        items: { $ref: '#/components/schemas/Mascota' },
+                      },
+                    },
+                  },
+                },
+              },
+            },
           },
         },
+        post: {
+          summary: 'Registrar una nueva mascota',
+          tags: ['Mascotas'],
+          description: 'Crea una mascota y la asigna automáticamente al usuario autenticado (rol usuario o admin)',
+          security: [{ apiKey: [] }],
+          parameters: [
+            { $ref: '#/components/parameters/UserId' },
+            { $ref: '#/components/parameters/UserRole' },
+          ],
+          requestBody: {
+            required: true,
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  required: ['nombre', 'fecha_nacimiento', 'especie', 'genero', 'id_raza'],
+                  properties: {
+                    nombre: { type: 'string', example: 'Firulais' },
+                    fecha_nacimiento: { type: 'string', format: 'date', example: '2023-05-15' },
+                    especie: { type: 'string', enum: ['perro', 'gato'], example: 'perro' },
+                    genero: { type: 'string', enum: ['macho', 'hembra'], example: 'macho' },
+                    id_raza: { type: 'integer', example: 1 }
+                  }
+                }
+              }
+            }
+          },
+          responses: {
+            201: {
+              description: 'Mascota registrada exitosamente',
+              content: {
+                'application/json': {
+                  schema: {
+                    type: 'object',
+                    properties: {
+                      success: { type: 'boolean', example: true },
+                      message: { type: 'string', example: 'Mascota registrada exitosamente' },
+                      data: { $ref: '#/components/schemas/Mascota' }
+                    }
+                  }
+                }
+              }
+            },
+            400: { description: 'Datos inválidos' },
+            401: { description: 'Faltan headers de autenticación' },
+            403: { description: 'Solo usuarios pueden registrar mascotas' },
+            404: { description: 'Raza no encontrada' },
+            409: { description: 'Conflicto (mascota duplicada)' }
+          }
+        }
       },
       '/api/mascotas/{id}': {
         get: {
@@ -733,7 +912,20 @@ const options = {
             },
           ],
           responses: {
-            200: { description: 'Mascota encontrada' },
+            200: {
+              description: 'Mascota encontrada',
+              content: {
+                'application/json': {
+                  schema: {
+                    type: 'object',
+                    properties: {
+                      success: { type: 'boolean', example: true },
+                      data: { $ref: '#/components/schemas/Mascota' },
+                    },
+                  },
+                },
+              },
+            },
             404: { description: 'Mascota no encontrada' },
           },
         },

@@ -1,9 +1,4 @@
 // app/models/mascota.model.js
-/**
- * models/mascota.model.js
- * Consultas SQL relacionadas con mascotas.
- */
-
 const { query, getClient } = require('../config/database');
 
 async function findAll() {
@@ -88,23 +83,15 @@ async function perteneceAUsuario(id_mascota, id_usuario) {
   return rows.length > 0;
 }
 
-/**
- * CREAR MASCOTA CON ASIGNACIÓN AUTOMÁTICA AL USUARIO
- */
-async function crearConUsuario({ 
-  nombre, 
-  fecha_nacimiento, 
-  especie, 
-  genero, 
-  id_raza, 
-  id_usuario 
-}) {
+// ============================================================
+// NUEVA FUNCIÓN
+// ============================================================
+async function crearConUsuario({ nombre, fecha_nacimiento, especie, genero, id_raza, id_usuario }) {
   const client = await getClient();
 
   try {
     await client.query('BEGIN');
 
-    // 1. Insertar la mascota
     const { rows: mascotaRows } = await client.query(
       `INSERT INTO mascota (
         nombre,
@@ -127,7 +114,6 @@ async function crearConUsuario({
 
     const nuevaMascota = mascotaRows[0];
 
-    // 2. Asignar la mascota al usuario en usuario_mascota
     await client.query(
       `INSERT INTO usuario_mascota (id_usuario, id_mascota)
        VALUES ($1, $2)`,
@@ -136,7 +122,6 @@ async function crearConUsuario({
 
     await client.query('COMMIT');
 
-    // 3. Retornar la mascota con sus relaciones
     return findById(nuevaMascota.id_mascota);
   } catch (error) {
     await client.query('ROLLBACK');
@@ -150,5 +135,5 @@ module.exports = {
   findAll,
   findById,
   perteneceAUsuario,
-  crearConUsuario  // ← NUEVO
+  crearConUsuario,
 };

@@ -36,7 +36,7 @@ router.put(
 
 router.patch(
   '/:id/cancelar',
-  requireRole('usuario', 'recepcionista', 'admin'),
+  requireRole('usuario', 'recepcionista', 'admin'),  // ← NO incluye 'especialista'
   validate(idParamSchema, 'params'),
   controller.cancelar
 );

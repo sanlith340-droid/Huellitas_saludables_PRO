@@ -6,7 +6,6 @@
 
 const disponibilidadModel = require('../models/disponibilidad.model');
 const usuarioModel = require('../models/usuario.model');
-const notificacionService = require('./notificacion.service');
 const AppError = require('../utils/AppError');
 
 async function listar(filtros) {
@@ -67,14 +66,7 @@ async function actualizar(id, cambios) {
     }
   }
 
-  const actualizada = await disponibilidadModel.update(id, cambios);
-
-  await notificacionService.notificarCambioDisponibilidad({
-    veterinarioId: actualizada.id_usuario,
-    disponibilidad: actualizada
-  });
-
-  return actualizada;
+  return disponibilidadModel.update(id, cambios);
 }
 
 async function eliminar(id) {

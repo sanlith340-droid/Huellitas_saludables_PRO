@@ -1,14 +1,8 @@
 // app/services/cita.service.js
-/**
- * services/cita.service.js
- * Lógica de negocio de citas.
- */
-
 const citaModel = require('../models/cita.model');
 const mascotaModel = require('../models/mascota.model');
 const disponibilidadModel = require('../models/disponibilidad.model');
 const usuarioModel = require('../models/usuario.model');
-const notificacionService = require('./notificacion.service');
 const AppError = require('../utils/AppError');
 
 async function listar(filtros) {
@@ -64,19 +58,12 @@ async function crear({ id_mascota, id_disponibilidad, motivo, solicitante }) {
   }
 
   try {
-    const nuevaCita = await citaModel.crearConTransaccion({
+    return await citaModel.crearConTransaccion({
       id_mascota,
       id_disponibilidad,
       id_recepcionista,
       motivo
     });
-
-    await notificacionService.notificarNuevaCita({
-      veterinarioId: nuevaCita.id_especialista,
-      cita: nuevaCita
-    });
-
-    return nuevaCita;
   } catch (error) {
     if (error.code === 'DISPONIBILIDAD_NO_EXISTE') {
       throw AppError.notFound('La disponibilidad no existe');
@@ -90,6 +77,14 @@ async function crear({ id_mascota, id_disponibilidad, motivo, solicitante }) {
 
 async function editar(id_cita, cambios, solicitante) {
   const cita = await obtenerPorId(id_cita);
+
+  // Restricción para usuarios
+  if (solicitante.rol === 'usuario') {
+    const esPropietario = await citaModel.perteneceAUsuario(id_cita, solicitante.id);
+    if (!esPropietario) {
+      throw AppError.forbidden('No tienes permiso para modificar esta cita porque no te pertenece');
+    }
+  }
 
   if (cambios.id_disponibilidad && cambios.id_disponibilidad !== cita.id_disponibilidad) {
     const nuevaDisponibilidad = await disponibilidadModel.findById(cambios.id_disponibilidad);
@@ -107,18 +102,19 @@ async function editar(id_cita, cambios, solicitante) {
 async function cancelar(id_cita, solicitante) {
   const cita = await obtenerPorId(id_cita);
 
+  // Restricción para usuarios
+  if (solicitante.rol === 'usuario') {
+    const esPropietario = await citaModel.perteneceAUsuario(id_cita, solicitante.id);
+    if (!esPropietario) {
+      throw AppError.forbidden('No tienes permiso para cancelar esta cita porque no te pertenece');
+    }
+  }
+
   if (cita.estado === 'cancelado') {
     throw AppError.conflict('La cita ya está cancelada');
   }
 
-  const citaCancelada = await citaModel.cancelarConTransaccion(id_cita);
-
-  await notificacionService.notificarCambioEstadoCita({
-    veterinarioId: citaCancelada.id_especialista,
-    cita: citaCancelada
-  });
-
-  return citaCancelada;
+  return citaModel.cancelarConTransaccion(id_cita);
 }
 
 module.exports = {
