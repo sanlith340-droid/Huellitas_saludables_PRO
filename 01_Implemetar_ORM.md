@@ -422,29 +422,3 @@ npx sequelize-cli db:seed:all
 | `app/models/*.model.js` | Cada modelo se convierte en definición de Sequelize |
 | `app/services/*.service.js` | Usan los modelos Sequelize (`Usuario.findByPk`, etc.) |
 
-##  ARCHIVOS QUE SE ELIMINAN (opcional)
-
-- Los modelos antiguos con SQL puro pueden eliminarse después de migrar, pero puedes conservarlos como respaldo. Recomiendo renombrar a `*.model.old.js` y luego eliminarlos.
-
----
-
-##  VENTAJAS DE ESTA ESTRUCTURA
-
-- **Migraciones versionadas**: control de cambios en la BD.
-- **Seeders**: datos de prueba reproducibles.
-- **Relaciones definidas en un solo lugar** (`models/index.js`).
-- **Consultas más legibles** con sintaxis de Sequelize.
-- **Transacciones simplificadas** (`sequelize.transaction()`).
-- **Sigue siendo monolítico** y mantiene la separación de capas.
-
----
-
-##  CONSIDERACIONES IMPORTANTES
-
-- **Los controladores y rutas no cambian**; solo los servicios y modelos.
-- **Autenticación temporal (`identifyUser`)** seguirá funcionando, pero después puedes migrar a JWT.
-- **La función `query`** en `database.js` se mantiene para compatibilidad, pero puedes reemplazarla progresivamente por métodos de Sequelize.
-
----
-
-**¿Listo para migrar? Sigue estos pasos y tendrás ORM funcionando sin romper la estructura actual.** 
